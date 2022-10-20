@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 > "Data is the new oil. It's valuable, but if unrefined it cannot really be used. It has to be changed into gas, plastic, chemicals, etc. to create a valuable entity that drives profitable activity; so must data be broken down, analysed for it to have value." - Clive Humby
 
-A frequent criticism of Kaggle and MOOC (Massive Open Online Courses) is that they are reducing data science to predictive modelling and they are using pre-cleaned or non-real-world datasets. Data Science is more than that. Data retrieval and cleansing are essential parts of the field too. You and I know that data can make a difference. If you can get better data, you perform better. Do you think data retrieval is a task for a data engineer? In a small startup or as an entrepreneur following your passions, you don't have access to one. You might have any data in the beginning. What is the solution to this problem? 
+A frequent criticism of Kaggle and MOOC (Massive Open Online Courses) is that they are reducing data science to predictive modelling and they are using pre-cleaned or non-real-world datasets. Data Science is more than that. Data retrieval and cleansing are essential parts of the field too. You and I know that data can make a difference. If you can get better data, you perform better. Do you think data retrieval is a task for a data engineer? In a small startup or as an entrepreneur following your passions, you don't have access to one. You might have any data in the beginning. What is the solution to this problem?
 
 Scraping the data from websites is a solution. Web scraping has a bad reputation, as people think that you are stealing the data. It is unethical in my eyes in case you are building up a competitive product with the data. But what is about taking the labelled photos to teach a neural network? I think this is OK. You might give the company even something valuable back or push their business with your data product.
 
@@ -30,7 +30,7 @@ Before you scrape a website __ALWAYS__ check it's [Terms of Service](https://en.
 
 ### 2. Invest time for technical research
 
-It's worth to invest time for technical research before you start scraping. Sometimes you don't need to scrape/parse the raw HTML files as there exists an internal REST API in the backend. Modern webpages use JavaScript Frameworks which use [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs. You even not able to parse HTML as the logic is executed in the browser. In this scenario, you might need a framework like [Selenium](https://www.seleniumhq.org/), that uses a modern browser in headless mode that is executing the JavaScript code. That are bad news, but you have the chance that there is a RESTful API in this case. These APIs just send JSON or XML back, which is even better than extracting the data from HTML. 
+It's worth to invest time for technical research before you start scraping. Sometimes you don't need to scrape/parse the raw HTML files as there exists an internal REST API in the backend. Modern webpages use JavaScript Frameworks which use [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs. You even not able to parse HTML as the logic is executed in the browser. In this scenario, you might need a framework like [Selenium](https://www.seleniumhq.org/), that uses a modern browser in headless mode that is executing the JavaScript code. That are bad news, but you have the chance that there is a RESTful API in this case. These APIs just send JSON or XML back, which is even better than extracting the data from HTML.
 
 You also need to check what headers your browser sends to your website. The developer tools of the browsers e.g [Mozilla Browser Developer Tools](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_are_browser_developer_tools) help you with this.
 
@@ -42,13 +42,13 @@ If you are not familiar with [Docker](https://github.com) then try it out. It's 
 
 ### 4. Always use first class proxies for scraping
 
-Use proxies already during development. Rotate the proxies randomly. This saves you a lot of trouble. My rule of a thumb is to use 10 proxies per scraping process/thread. Try to avoid free proxies lists. The proxies on these lists are often slow or already blocked. It is a waste of time to try them out. Google for proxy providers. You need to invest some money here. You can even buy non-shared proxies, but they have their costs. I can recommend [ScraperAPI](https://www.scraperapi.com?fpr=jens78) and [Bonanza Proxies](https://proxybonanza.com/?aff_id=831), which I use both.
-
+Use proxies already during development. Rotate the proxies randomly. This saves you a lot of trouble. My rule of a thumb is to use 10 proxies per scraping process/thread. Try to avoid free proxies lists. The proxies on these lists are often slow or already blocked. It is a waste of time to try them out. Google for proxy providers.
+You need to invest some money here. You can even buy non-shared proxies, but they have their costs. I can recommend [ScraperAPI](https://www.scraperapi.com/?fpr=jens78) , [ZenRows](https://www.zenrows.com/?ref=jen27) and [Bonanza Proxies](https://proxybonanza.com/?aff_id=831), which I use the most.
 
 ### 5. Write a dump scraper first, then the parser
 
 
-Write first a scraper that just fetches a resource and saves it. Ensure that this data is the same as the data downloaded from your browser. If this is the case you can increase the number of processes/threads and load more data. Once you have a bunch of raw data files (not too many!) you start to develop the parser. Extract the data you need and check if the data is OK. Do an exploratory data analysis, check for data anomalities like missing values or outliers to ensure a high quality parsing logic. Log all errors while you parse. This way you can find out, if the logic works for all resources the same. 
+Write first a scraper that just fetches a resource and saves it. Ensure that this data is the same as the data downloaded from your browser. If this is the case you can increase the number of processes/threads and load more data. Once you have a bunch of raw data files (not too many!) you start to develop the parser. Extract the data you need and check if the data is OK. Do an exploratory data analysis, check for data anomalities like missing values or outliers to ensure a high quality parsing logic. Log all errors while you parse. This way you can find out, if the logic works for all resources the same.
 
 __Keep the scraping logic seperated from the parsing logic.__
 
@@ -83,7 +83,7 @@ Save the raw data in a database. I love [MongoDB's GridFS](https://docs.mongodb.
 - You can build a history of raw files for a resource
 - You overcome file system limitations like the maximum number of files/directory
 
-Use a database for the parsed data. You are getting an improved data access through the use of query languages. 
+Use a database for the parsed data. You are getting an improved data access through the use of query languages.
 
 [MongoDB](https://www.mongodb.com/) is an excellent choice here, as you don't need a scheme, you can just save the data as it is. Especially if you able to scrape from an internal API. From APIs you get often JSON, and you can toss the JSON as it is into the MongoDB.
 

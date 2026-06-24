@@ -88,10 +88,14 @@ def menu_nav():
     return "".join(f'<a href="{u}">{n}</a>' for n, u in MENU)
 
 
-def page(title, body, *, description=None, canonical=None, og_type="website", lead=False):
+def page(title, body, *, description=None, canonical=None, og_type="website", lead=False, og_image=None):
     desc = html.escape(description or DESCRIPTION)
     can = canonical or "/"
     head_title = TITLE + " | " + DESCRIPTION if title == "Home" else f"{title} | {TITLE}"
+    img_url = (og_image if str(og_image).startswith("http") else SITE_URL + og_image) if og_image else None
+    img_tags = (f'\n<meta property="og:image" content="{img_url}">'
+                f'\n<meta name="twitter:image" content="{img_url}">' if img_url else "")
+    twitter_card = "summary_large_image" if img_url else "summary"
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,8 +108,8 @@ def page(title, body, *, description=None, canonical=None, og_type="website", le
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{SITE_URL}{can}">
-<meta property="og:site_name" content="{TITLE}">
-<meta name="twitter:card" content="summary">
+<meta property="og:site_name" content="{TITLE}">{img_tags}
+<meta name="twitter:card" content="{twitter_card}">
 <link rel="alternate" type="application/atom+xml" title="{TITLE}" href="/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,6 +167,7 @@ def build():
             "title": fm.get("title", slug), "subtitle": fm.get("subtitle"),
             "image": fm.get("image"), "image_subtitle": fm.get("image_subtitle"),
             "html": h, "rt": read_time(h), "author": fm.get("author", AUTHOR),
+            "og_image": fm.get("og_image") or fm.get("image"),
         })
     posts.sort(key=lambda p: p["date"], reverse=True)
 
@@ -187,7 +192,8 @@ def build():
 <p class="share"><a href="{tweet}">Feel free to share &rarr;</a></p>
 </article>"""
         write(p["url"], page(p["title"], body, description=p["subtitle"] or p["title"],
-                             canonical=p["url"], og_type="article", lead=True))
+                             canonical=p["url"], og_type="article", lead=True,
+                             og_image=p["og_image"]))
 
     # --- index pagination (/, /page2/, /page3/) ---
     pages = [posts[i:i + PER_PAGE] for i in range(0, len(posts), PER_PAGE)] or [[]]

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 <title>Jens Laufer</title><subtitle>writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</subtitle>
 <link href="https://jenslaufer.com/feed.xml" rel="self"/><link href="https://jenslaufer.com/"/>
-<updated>2026-06-24T13:03:16Z</updated><id>https://jenslaufer.com/</id>
+<updated>2026-06-24T13:05:57Z</updated><id>https://jenslaufer.com/</id>
 <author><name>Jens Laufer</name></author>
 <entry><title>Ich habe meine Firma einer Maschine übergeben</title><link href="https://jenslaufer.com/entrepreneurship/138-fehlschlaege.html"/><id>https://jenslaufer.com/entrepreneurship/138-fehlschlaege.html</id><updated>2026-06-24T00:00:00Z</updated><published>2026-06-24T00:00:00Z</published><content type="html">&lt;style&gt;
 .essay-138 .lead-cap::first-letter{font-size:3.4rem;line-height:.8;float:left;padding:.42rem .55rem 0 0;font-weight:560;color:var(--accent);}

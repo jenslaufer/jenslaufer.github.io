@@ -3,6 +3,7 @@ title: "Ich habe meine Firma einer Maschine übergeben"
 subtitle: "Seit Monaten betreibt eine Flotte autonomer KI-Agenten meine GmbH — sie schreibt nachts Code, deployt ihn, führt meine Buchhaltung, verschickt Bewerbungen. Das hier ist kein Vortrag über die Zukunft der KI. Es ist ein Bericht von jemandem, der es tut. Mit Narben."
 categories: entrepreneurship
 author: Jens Laufer
+og_image: /assets/img/138-fehlschlaege-og.png
 ---
 
 <style>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Lessons Learned from Scraping Websites | Jens Laufer</title>
+<meta name="description" content="Valuable insights which I gained from retrieving data from many websites over the last years which I want to share with you">
+<link rel="canonical" href="https://jenslaufer.com/data retrieval/10_lessons_learned_from_scraping_websites.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="10 Lessons Learned from Scraping Websites">
+<meta property="og:description" content="Valuable insights which I gained from retrieving data from many websites over the last years which I want to share with you">
+<meta property="og:url" content="https://jenslaufer.com/data retrieval/10_lessons_learned_from_scraping_websites.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">February 19, 2019 · 8 minute read</p>
+<h1>10 Lessons Learned from Scraping Websites</h1>
+<p class="post-subtitle">Valuable insights which I gained from retrieving data from many websites over the last years which I want to share with you</p>
+<figure class="post-hero"><img src="/assets/img/scraping.jpg" alt=""></figure>
+<div class="post-body">
+<blockquote>
+<p>&ldquo;Data is the new oil. It&rsquo;s valuable, but if unrefined it cannot really be used. It has to be changed into gas, plastic, chemicals, etc. to create a valuable entity that drives profitable activity; so must data be broken down, analysed for it to have value.&rdquo; - Clive Humby</p>
+</blockquote>
+<p>A frequent criticism of Kaggle and MOOC (Massive Open Online Courses) is that they are reducing data science to predictive modelling and they are using pre-cleaned or non-real-world datasets. Data Science is more than that. Data retrieval and cleansing are essential parts of the field too. You and I know that data can make a difference. If you can get better data, you perform better. Do you think data retrieval is a task for a data engineer? In a small startup or as an entrepreneur following your passions, you don&rsquo;t have access to one. You might have any data in the beginning. What is the solution to this problem? </p>
+<p>Scraping the data from websites is a solution. Web scraping has a bad reputation, as people think that you are stealing the data. It is unethical in my eyes in case you are building up a competitive product with the data. But what is about taking the labelled photos to teach a neural network? I think this is OK. You might give the company even something valuable back or push their business with your data product.</p>
+<p>I got my hands dirty over the last years to learn data science and to build up my own data products. In this time I scraped data from many websites and learned a lot. I want to share the most important lessons with you:</p>
+<h3>1. Check the Legal Stuff</h3>
+<p>Before you scrape a website <strong>ALWAYS</strong> check it&rsquo;s <a href="https://en.wikipedia.org/wiki/Terms_of_service">Terms of Service</a> and the  <a href="https://en.wikipedia.org/wiki/Robots_exclusion_standard">robots.txt</a> to answer the question what you are allowed to fetch and what not. This saves you a lot of trouble and the risk of a court case. Please remember that scraping is a grey zone. Do you want to get sued by Google or Amazon?</p>
+<h3>2. Invest time for technical research</h3>
+<p>It&rsquo;s worth to invest time for technical research before you start scraping. Sometimes you don&rsquo;t need to scrape/parse the raw HTML files as there exists an internal REST API in the backend. Modern webpages use JavaScript Frameworks which use <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">REST</a> APIs. You even not able to parse HTML as the logic is executed in the browser. In this scenario, you might need a framework like <a href="https://www.seleniumhq.org/">Selenium</a>, that uses a modern browser in headless mode that is executing the JavaScript code. That are bad news, but you have the chance that there is a RESTful API in this case. These APIs just send JSON or XML back, which is even better than extracting the data from HTML. </p>
+<p>You also need to check what headers your browser sends to your website. The developer tools of the browsers e.g <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_are_browser_developer_tools">Mozilla Browser Developer Tools</a> help you with this.</p>
+<h3>3. Dockerize your scraping application</h3>
+<p>Build a docker container for your scraping application. Scraping configurations can be a bit complicated, especially if you fetch the data from the resource with Selenium, which uses a browser like Chromium or Firefox. You need operating system dependent drivers for this situation. You can use my <a href="https://cloud.docker.com/repository/docker/jenslaufer/docker-chromedriver-geckodriver">docker image with Firefox/Geckodriver and Chromium/Chromedriver</a> on Dockerhub as a base image for your scraping application. The source can be downloaded from <a href="https://github.com/jenslaufer/docker-chromedriver-geckodriver">Github</a>. Use <a href="https://docs.docker.com/compose/">Docker Compose</a>: It is a tool for defining and running multi-container Docker applications. This way you can set up a database with no effort along with your scraping container.
+If you are not familiar with <a href="https://github.com">Docker</a> then try it out. It&rsquo;s a secret weapon for reliable runtime environments for all kind of software projects.</p>
+<h3>4. Always use first class proxies for scraping</h3>
+<p>Use proxies already during development. Rotate the proxies randomly. This saves you a lot of trouble. My rule of a thumb is to use 10 proxies per scraping process/thread. Try to avoid free proxies lists. The proxies on these lists are often slow or already blocked. It is a waste of time to try them out. Google for proxy providers. You need to invest some money here. You can even buy non-shared proxies, but they have their costs. I can recommend <a href="https://www.scraperapi.com?fpr=jens78">ScraperAPI</a> and <a href="https://proxybonanza.com/?aff_id=831">Bonanza Proxies</a>, which I use both.</p>
+<h3>5. Write a dump scraper first, then the parser</h3>
+<p>Write first a scraper that just fetches a resource and saves it. Ensure that this data is the same as the data downloaded from your browser. If this is the case you can increase the number of processes/threads and load more data. Once you have a bunch of raw data files (not too many!) you start to develop the parser. Extract the data you need and check if the data is OK. Do an exploratory data analysis, check for data anomalities like missing values or outliers to ensure a high quality parsing logic. Log all errors while you parse. This way you can find out, if the logic works for all resources the same. </p>
+<p><strong>Keep the scraping logic seperated from the parsing logic.</strong></p>
+<h3>6. Scrape every unique URL rarely</h3>
+<p>I try to scrape each URL only once. Or very very rarely!</p>
+<p>You don&rsquo;t want to download the same resource over and over again, especially during development. We all have a kind of trial and error programming style. We write a piece of code and test if it works or not, do some bug fixing. This can be fatal during scraper development as you risk to get blocked already in this phase. The block is sometimes only for a few hours, but the block blocks your programming. Seperating the parsing logic from the scraper logic helps you to reduce the lines of code in which you can make errors. Keep this in mind:</p>
+<ul>
+<li>Don&rsquo;t send too many useless requests to a website. It&rsquo;s also a kind of respect to the valuable data the site offers you. You don&rsquo;t want to get blocked or banned as said before.</li>
+<li>Don&rsquo;t download massive amount of data in the beginning in multiple threads/processes. Try to download single resources until your scraping code works fine.</li>
+<li>Implement a flag that you are able to force the resource download when it is outdated. Outdated means for me several weeks rather than several hours. This depends for sure also what you want to do. If you need the data more often, try to scrape with more proxies.</li>
+</ul>
+<h3>7. Always keep the raw files (raw oil!)</h3>
+<p>It&rsquo;s essential to keep the raw data once the resource is scraped. This has several advantages:</p>
+<ol>
+<li>You can improve the parser logic in as many iterations as you need, without having risk of being blocked</li>
+<li>Raw data are like diamonds. You can find more interesting stuff in the data later, stuff you weren&rsquo;t interested in first iterations</li>
+<li>You reduce the blocking risk</li>
+</ol>
+<h3>8. Mimic a real browser with your headers</h3>
+<p>Set proper headers, when fetching a resource from a website. Check what your browser is sending and mimic a real browser in your code. In my experience one of the most important one is the user agent header. I am sharing a very <a href="https://github.com/jenslaufer/pyuseragents">simple python module for useragent rotation</a> with you. It takes randomly one user agent out of thousands.</p>
+<h3>9. Use a database for your data</h3>
+<p>Save the raw data in a database. I love <a href="https://docs.mongodb.com/manual/core/gridfs/">MongoDB&rsquo;s GridFS</a> for this task. The API is very simple. You have different advantages with this:</p>
+<ul>
+<li>You can save multiple metadata with the file (e.g. the query parameters you used to get the resource, retrieval date etc.), which is difficult in your local filesystem.</li>
+<li>You can build a history of raw files for a resource</li>
+<li>You overcome file system limitations like the maximum number of files/directory</li>
+</ul>
+<p>Use a database for the parsed data. You are getting an improved data access through the use of query languages. </p>
+<p><a href="https://www.mongodb.com/">MongoDB</a> is an excellent choice here, as you don&rsquo;t need a scheme, you can just save the data as it is. Especially if you able to scrape from an internal API. From APIs you get often JSON, and you can toss the JSON as it is into the MongoDB.</p>
+<h3>10. Ensure data quality with a data analysis</h3>
+<p>Once you have a bunch of raw files and your parser is written do an Exploratory Data Analysis (EDA) to check the data quality. Check for missing values. I wrote a blog post about <a href="http://jenslaufer.com/data/analysis/visualize_missing_values_with_ggplot.html">Missing values visualization with tidyverse in R</a> which might help you. Do a univariate data analysis to check for anomalities for each feature. Do a multivariate analysis to check, if values in linked features are consistent. Visualizations are your best friends here.</p>
+<p>This step is essential and missed out by many people. You find the weak points in your parsing logic. You might go through several iterations to improve the parsing logic until you are happy.</p>
+<p><em>Feel free to <a href="mailto:jenslaufer@gmail.com">send me a message</a> in case you need support in your scraping project.</em></p>
+</div>
+<p class="byline">Written on February 19th, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=10 Lessons Learned from Scraping Websites&url=https://jenslaufer.com/data retrieval/10_lessons_learned_from_scraping_websites.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

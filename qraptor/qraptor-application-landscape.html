@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>qraptor Technology Stack Part Two: Applications in September 2019 | Jens Laufer</title>
+<meta name="description" content="The application we use for our reinforcement trading platform">
+<link rel="canonical" href="https://jenslaufer.com/qraptor/qraptor-application-landscape.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qraptor Technology Stack Part Two: Applications in September 2019">
+<meta property="og:description" content="The application we use for our reinforcement trading platform">
+<meta property="og:url" content="https://jenslaufer.com/qraptor/qraptor-application-landscape.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">September 9, 2019 · 4 minute read</p>
+<h1>qraptor Technology Stack Part Two: Applications in September 2019</h1>
+<p class="post-subtitle">The application we use for our reinforcement trading platform</p>
+<figure class="post-hero"><img src="https://res.cloudinary.com/jenslaufer/image/upload/c_scale,q_74,w_800/v1568015884/matt-artz-pH6wLT6TVFc-unsplash.jpg" alt=""></figure>
+<div class="post-body">
+<p>In <a href="/qraptor/qraptors-technology-stack-programming-languages.html">Part One: Architecture and Programming Languages</a> we showed you that we using several programming 
+languages to get things done. Today we want to go more into details what applications/micro services for our reinforcement trading platform. It&rsquo;s devided into
+several parts. First, we show you the shared technical services we use and second all the services to run our core business: algorithmic trdaing with reinforcement learning.</p>
+<h2>Shared Technical Services</h2>
+<h2>MongoDB</h2>
+<p><img alt="@TODO MongoDB Logo" src="" /></p>
+<p>MongoDb is our persistence container for a variety of artefacts, some of them are saved as MongoDB documents, which is basically simple JSON. We use also the GridFS-Filesystem for persisting
+file-like structures. We love MongoDB, because of it&rsquo;s simplicity. You don&rsquo;t need schemas to persist data. However, we know that having no schema is in some situations risky.</p>
+<p>The artefacts we persist in MongoDB:</p>
+<ul>
+<li>Training Session Meta Data 
+@TODO example</li>
+</ul>
+<p>We save the complete the Meta Data for each training session with all the parmeters in the MongoDB. The trainer fetches new training sessions and dynamically initializes the train</p>
+<ul>
+<li>Trained Models from Trainer in hdf5 file</li>
+</ul>
+<p>What we haven&rsquo;t done so far is to persist the source data files into the MongoDB, although they should be there to be fully straighforward. To be honest we are bit to scared to save hundreds of GB in the GridFS.
+filesystem.</p>
+<ul>
+<li>Training results as CSV</li>
+</ul>
+<h2>Portainer</h2>
+<p>Every application/service we use is packed as a Docker container. We use docker-compose and docker-machine for the management of the application. We use <a href="https://www.portainer.io/">Portainer</a> for web based Docker management. Portainer is a Docker container by itself and is dead-simple to install and makes life easy.</p>
+<p><img alt="Portainer Screenshot for qrapotor Applications" src="@TODO" /></p>
+<h2>Exploratory Data Analysis</h2>
+<p>For the exploratory data analysis we use RMarkdown a lot. As the data files are very big we apply some data reducing before. We seperate the core logic and visualisations from the Rmarkdown code to reuse it in other notebooks and in Shiny Apps. We use Shiny Dashboards for on the fly data analysis or for Dashboarding for our clients.</p>
+<h2>Data Wrangling</h2>
+<h3>Data Reducing</h3>
+<p>For our one client we are having data for each instruments for very second for 9 years with about 30 datapoints. It adds about to about 15 GB of data each instrument. Importing this amount of data into a dataframe with pandas in Python or dplyr in R is challenge. So we perform a kind of reducing on the data for data analysis or our first training sessions. You can reduce the data to a certain unit and interval e.g. five minutes or 30 seconds. The Libraries from <a href="https://www.tidyverse.org/">tidyverse</a> ecosystem in R lets us do this redcution. The code is pretty self-explaining with a bare minimum lines of code. We added REST-like interface to the reducer microservice with <a href="https://www.rplumber.io/">plumber</a>.</p>
+<h3>Data Preprocessing</h3>
+<p>We created a data preprocessing microservice also with a REST-like API with plumber. We can select what features we want to include into the datasets and which of these fields need to be preprocessed. The services splits in a first step the training and test data. The data are time series data, so we detrended the data by differencing.</p>
+<h2>Training Environment</h2>
+<h3>Training Framework</h3>
+<p>Our Training frameworks loads training sessions from the MongoDB and initializes dynamically the Python objects for the training. We do the Then a training is performed and the model is tested against the test set. The training and test process, the model and test metrics are persisted in the MongoDB. We keep our  training process reproducable this way. The heart of the training framework are <a href="https://github.com/openai/gym/blob/master/docs/creating-environments.md">OpenAI Gym Environment</a> and the <a href="https://stable-baselines.readthedocs.io/en/master/">Stable Baseline</a> implementations of reinforcement learning algorithms, although the framework should also be able to use other libraries like <a href="https://github.com/keras-rl/keras-rl">Keras-RL</a>.</p>
+<h3>Training Session Tool</h3>
+<p>The JSON for training session is very complicated, as it holds all attributes for a training session. Adding new training sessions into the DB takes therefore a lot of time and is error prone. Parameter tuning requires strategies: You change e.g. one parameter and observe if the performance on the test set is getting better or not. We created a tool that lets us easily create multiple training sessions for different parameter set ups. The tool is written with <a href="https://vuejs.org/">Vue.js</a> and <a href="https://quasar.dev/">Quasar</a> with a <a href="https://spring.io/projects/spring-boot">Spring Boot</a> Java Backend.</p>
+<h3>Tensorboard</h3>
+<p>Tensorboard lets us track session experiment metrics, visualise the training process and model graphs. We use Tensorboard hand in hand with out Training Analysis Dasboard to analyse our training sessions.</p>
+<p><a href="">@Todo Screenshot</a></p>
+<h2>Training Result Analysis</h2>
+<p>We created a dashboard for analysis of the training results. It&rsquo;s a shiny app with very lines of code. ggplot2 is our visualisation library, as it is the vis library we are the most familiar with. The ggplot visualisations by itself are not per se interactive, but we might use plot.ly in future to accomplish this.
+Another option is to integrate our own datapoints into Tensorboard visualisations.</p>
+<p><a href="">@Todo Screenshot </a></p>
+</div>
+<p class="byline">Written on September 9th, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=qraptor Technology Stack Part Two: Applications in September 2019&url=https://jenslaufer.com/qraptor/qraptor-application-landscape.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

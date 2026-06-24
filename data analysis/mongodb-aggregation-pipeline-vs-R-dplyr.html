@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mongo DB Aggregation vs R dplyr | Jens Laufer</title>
+<meta name="description" content="Mongo DB Aggregation vs R dplyr">
+<link rel="canonical" href="https://jenslaufer.com/data analysis/mongodb-aggregation-pipeline-vs-R-dplyr.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mongo DB Aggregation vs R dplyr">
+<meta property="og:description" content="Mongo DB Aggregation vs R dplyr">
+<meta property="og:url" content="https://jenslaufer.com/data analysis/mongodb-aggregation-pipeline-vs-R-dplyr.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">June 4, 2018 · 5 minute read</p>
+<h1>Mongo DB Aggregation vs R dplyr</h1>
+
+<figure class="post-hero"><img src="/assets/img/16702185956_0313e29b69_z.jpg" alt=""></figure>
+<div class="post-body">
+<p>There are  powerful options to do the processing you want:</p>
+<ol>
+<li>
+<p><strong><a href="https://docs.mongodb.com/manual/aggregation/">Mongo DB aggregation framework</a></strong>:</p>
+<p>Aggegation operations process data records results. Aggregation operations group values from multiple documents together, and can perform a variety of operations on the grouped data to return a single result.</p>
+</li>
+<li>
+<p><strong><a href="https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html">dplyr framework in R</a></strong></p>
+<p>dplyr is a grammar of data manipulation, providing a consistent set of verbs to solve most common data manipluation tasks. The framework is part of the <a href="tidyverse">tidyverse</a> ecosystem in R.</p>
+</li>
+</ol>
+<p>In this post I want to shortly compare the code needed for aggregated values site-by-site on a practial example on which I worked recently on: <a href="http://bnbdata.co/products/airbnb_local_market_analysis/">Airbnb Local Market Analysis</a>. In this projects live calendar data for all Airbnb listings for a region are scraped from their website and persisted into a MongoDB. For every day in the calendar there is one document per listing in the database, that looks like this:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">(</span><span class="s2">&quot;5b113b287c9f8e50597db3a6&quot;</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;available&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;loc&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;coordinates&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="mf">114.139377439</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="mf">22.2862727991</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">&quot;local_adjusted_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;native_adjusted_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">510</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;local_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;native_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">510.0</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2018-04-29&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;native_currency&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;HKD&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;local_currency&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">&quot;local_price_formatted&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;€57&quot;</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;max_nights&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">7</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;date&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2018-04-29T00:00:00.000+0000&quot;</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;min_nights&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">2</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">10002239</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>From the calendar data different metrics needed to be calculated: E.g. Occupancy which is the proportion a listing is booked out in a time period, or the average price a night is sold.</p>
+<p>This is a typical scenario for calculating summary statistics from raw data.</p>
+<h2>Mongo DB aggregation framework:</h2>
+<p>Aggregation pipelines consist of different stages. Let&rsquo;s build the pipeline stage by stage:</p>
+<ul>
+<li>First we want to fetch all listings based on their geolocation. We want all the dates for all listing in an area 100,000 meters around  a geo location:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;$geoNear&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;near&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Point&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="m">10.9867379057</span><span class="p">,</span>
+<span class="w">                    </span><span class="m">49.4650778012</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s">&quot;spherical&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">1</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;maxDistance&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;distanceField&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;dist&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;limit&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Next two helper fields are added. One is the &lsquo;paid_price&rsquo;, which is price that was paid for a booking and 0 in case of a place not booked. The field &lsquo;unavailable&rsquo; is needed as a helper field for calculation the number of unavailable days by replacing the boolean values with binary values.</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">        </span><span class="s">&#39;$addFields&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&#39;paid_price&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="kr">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="o">$</span><span class="n">eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">false</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="n">then</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$price.local_adjusted_price&#39;</span><span class="p">,</span>
+<span class="w">                    </span><span class="kr">else</span><span class="o">:</span><span class="w"> </span><span class="m">0</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s">&#39;unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="kr">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="o">$</span><span class="n">eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">false</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="n">then</span><span class="o">:</span><span class="w"> </span><span class="m">1</span><span class="p">,</span>
+<span class="w">                    </span><span class="kr">else</span><span class="o">:</span><span class="w"> </span><span class="m">0</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Next we group on the listing id and calculate helper variables for preperation of the final results. We calculate total revenue by adding up alle the paid prices, the number of all days for the group and the number of unavailable days:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">        </span><span class="s">&#39;$group&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&#39;_id&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$id&#39;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&#39;total_revenue&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$paid_price&#39;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s">&#39;num_unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$unavailable&#39;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s">&#39;num_total&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="m">1</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Finally we calculate the metrics occupancy and average daily rate</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">        </span><span class="s">&#39;$project&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&#39;occupancy&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="o">$</span><span class="n">divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="s">&quot;$num_unavailable&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">&#39;$num_total&#39;</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s">&#39;average_daily_rate&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="o">$</span><span class="n">divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="s">&quot;$total_revenue&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">&#39;$num_unavailable&#39;</span>
+<span class="w">                </span><span class="p">]</span><span class="w"> </span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The final result:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">&quot;$geoNear&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s2">&quot;near&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">10.9867379057</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">49.4650778012</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s2">&quot;spherical&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;maxDistance&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;distanceField&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;dist&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;limit&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s1">&#39;$addFields&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">&#39;paid_price&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="nx">$eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s2">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="kc">false</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="nx">then</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$price.local_adjusted_price&#39;</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">else</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s1">&#39;unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="nx">$eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s2">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="kc">false</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="nx">then</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">else</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s1">&#39;$group&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">&#39;_id&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$id&#39;</span><span class="p">,</span>
+<span class="w">            </span><span class="s1">&#39;total_revenue&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$paid_price&#39;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s1">&#39;num_unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$unavailable&#39;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s1">&#39;num_total&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s1">&#39;$project&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">&#39;occupancy&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">$divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="s2">&quot;$num_unavailable&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s1">&#39;$num_total&#39;</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s1">&#39;average_daily_rate&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">$divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="s2">&quot;$total_revenue&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s1">&#39;$num_unavailable&#39;</span>
+<span class="w">                </span><span class="p">]</span><span class="w"> </span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<h2>dpylr Framework</h2>
+<p>With R we need to fetch the dates for the listings we are interested in. We could do this by simple fetch everything from the MongoDB and do everything with dplyr. </p>
+<p>In this example we fetch the dates for all the listing near a location. We actually use the first stage from our pipeline on our MongoDB pipeline.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pipeline</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&#39;[</span>
+<span class="s">    {</span>
+<span class="s">        &quot;$geoNear&quot;: {</span>
+<span class="s">            &quot;near&quot;: {</span>
+<span class="s">                &quot;type&quot;: &quot;Point&quot;,</span>
+<span class="s">                &quot;coordinates&quot;: [</span>
+<span class="s">                    10.9867379057,</span>
+<span class="s">                    49.4650778012</span>
+<span class="s">                ]</span>
+<span class="s">            },</span>
+<span class="s">            &quot;spherical&quot;: 1,</span>
+<span class="s">            &quot;maxDistance&quot;: 100000,</span>
+<span class="s">            &quot;distanceField&quot;: &quot;dist&quot;,</span>
+<span class="s">            &quot;limit&quot;: 100000</span>
+<span class="s">        }</span>
+<span class="s">    }]&#39;</span>
+
+
+<span class="n">dates.collection</span><span class="w"> </span><span class="o">&lt;-</span>
+<span class="w">  </span><span class="nf">mongo</span><span class="p">(</span><span class="s">&quot;dates&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;airbnb&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mongodb://localhost:27017&quot;</span><span class="p">)</span>
+<span class="n">dates.df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="n">dates.collection</span><span class="o">$</span><span class="nf">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">))</span>
+</code></pre></div>
+
+<p>Next we do the aggregation on the dates dataframe with dplyr:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">dates.df</span><span class="w"> </span><span class="o">%&gt;%</span>
+<span class="w">  </span><span class="nf">group_by</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span>
+<span class="w">  </span><span class="nf">summarize</span><span class="p">(</span>
+<span class="w">    </span><span class="n">occupancy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span><span class="n">available</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nf">n</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">average_daily_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span><span class="n">price.local_adjusted_price</span><span class="p">[</span><span class="n">available</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">])</span><span class="w"> </span>
+<span class="w">                         </span><span class="o">/</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span><span class="n">available</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span>
+<span class="w">  </span><span class="p">)</span>
+</code></pre></div>
+
+<p>Wow, this very simple and readable. Indeed it&rsquo;s simplier than in a Aggregation pipeline in MongoDB. </p>
+<p>But we cheated a little bit, as the initial loading is done with an easy 1-stage-aggregation-pipeline in Mongo.</p>
+<p>```r
+library(tidyverse)
+library(jsonlite)
+library(mongolite)
+library(glue)</p>
+<p>pipeline &lt;- &lsquo;[
+    {
+        &ldquo;$geoNear&rdquo;: {
+            &ldquo;near&rdquo;: {
+                &ldquo;type&rdquo;: &ldquo;Point&rdquo;,
+                &ldquo;coordinates&rdquo;: [
+                    10.9867379057,
+                    49.4650778012
+                ]
+            },
+            &ldquo;spherical&rdquo;: 1,
+            &ldquo;maxDistance&rdquo;: 100000,
+            &ldquo;distanceField&rdquo;: &ldquo;dist&rdquo;,
+            &ldquo;limit&rdquo;: 100000
+        }
+    }]&rsquo;</p>
+<p>dates.collection &lt;-
+  mongo(&ldquo;dates&rdquo;, &ldquo;airbnb&rdquo;, url = &ldquo;mongodb://localhost:27017&rdquo;)
+dates.df &lt;- flatten(dates.collection$aggregate(pipeline))</p>
+<p>dates.df %&gt;%
+  group_by(id) %&gt;%
+  summarize(
+    occupancy = sum(available == FALSE) / n(),
+    average_daily_rate = sum(price.local_adjusted_price[available == FALSE]) 
+                         / sum(available == FALSE)
+  )</p>
+<p>```</p>
+<h2>Conclusion</h2>
+<p>Both options for aggregation of new data are pretty straightforward and actually similiar.</p>
+<p>I would prefer the option with dplyr, because it&rsquo;s simple and I like to have all complicated calculations and aggregations in my data analysis code. I don&rsquo;t want to switch from MongoDB and R and back all the time.</p>
+<p>It&rsquo;s defintely worth your while to learn the aggregation framework from MongoDB as you can use it together (like we did with the geonear search) with dplyr.</p>
+</div>
+<p class="byline">Written on June 4th, 2018 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Mongo DB Aggregation vs R dplyr&url=https://jenslaufer.com/data analysis/mongodb-aggregation-pipeline-vs-R-dplyr.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

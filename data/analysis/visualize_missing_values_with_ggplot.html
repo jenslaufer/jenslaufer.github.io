@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing value visualization with tidyverse in R | Jens Laufer</title>
+<meta name="description" content="A short practical guide how to find and visualize missing data with ggplot2, dplyr, tidyr">
+<link rel="canonical" href="https://jenslaufer.com/data/analysis/visualize_missing_values_with_ggplot.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Missing value visualization with tidyverse in R">
+<meta property="og:description" content="A short practical guide how to find and visualize missing data with ggplot2, dplyr, tidyr">
+<meta property="og:url" content="https://jenslaufer.com/data/analysis/visualize_missing_values_with_ggplot.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">February 5, 2019 · 5 minute read</p>
+<h1>Missing value visualization with tidyverse in R</h1>
+<p class="post-subtitle">A short practical guide how to find and visualize missing data with ggplot2, dplyr, tidyr</p>
+<figure class="post-hero"><img src="/assets/img/missing_values.jpg" alt=""></figure>
+<div class="post-body">
+<p>Finding missing values is an important task during the <a href="https://en.wikipedia.org/wiki/Exploratory_data_analysis">Exploratory Data Analysis (EDA)</a>. They can affect the quality of machine learning models and need to be cleaned before training models. Detecting the missing values let&rsquo;s you also evaluate the quality of your data retrieval process. This short practical guide will show you how to find missing values and visualize them with the tidyverse ecosystem. <a href="https://www.tidyverse.org/">tidyverse</a> is a collection of R packages for data science. It says on their homepage that &ldquo;&hellip;all packages share an underlying design philosophy, grammar, and data structures.&rdquo; </p>
+<h3>The dataset</h3>
+<p>The dataset is scraped from a eCommerce website and contains product data. You check the quality of the data retrieval by evaluating the missing values. A feature with a lot of missing values might be a indicator for a problem with the extraction logic for that feature or the data is missing due to other reasons.</p>
+<p>{% highlight r %}
+df %&gt;% 
+  head(10) 
+{% endhighlight %}
+<img src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" width="200%" /></p>
+<p>The dataset consists of 11 variables with 2172 rows.</p>
+<h3>Table with missing values</h3>
+<p>You can count the values of missing values for each feature in the dataset:</p>
+<p _="%" endhighlight="endhighlight">{% highlight r %}
+missing.values &lt;- df %&gt;%
+    gather(key = &ldquo;key&rdquo;, value = &ldquo;val&rdquo;) %&gt;%
+    mutate(is.missing = is.na(val)) %&gt;%
+    group_by(key, is.missing) %&gt;%
+    summarise(num.missing = n()) %&gt;%
+    filter(is.missing==T) %&gt;%
+    select(-is.missing) %&gt;%
+    arrange(desc(num.missing)) </p>
+<p>{% highlight text %}</p>
+<h2><code>summarise()</code> regrouping output by &lsquo;key&rsquo; (override with <code>.groups</code> argument)</h2>
+<p>{% endhighlight %}</p>
+<p><img src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" width="200%" /></p>
+<p>You can use the gather function from tidyr to collapse the columns into key-value pairs. Then you create a new logical feature which is true in case of a missing value. You group on the key and the new logical feature to do a count. Then you filter on the logical feature to get the count where the value is missing. You skip the rows which are not needed and sort by the number of missing values. </p>
+<h3>Visualize missing data</h3>
+<p><strong>Tables</strong> with their rows and columns  are read by our verbal system. This system is very slow. </p>
+<p><strong>Graphs</strong> interact with our visual system, which is much faster than the verbal system. This is the reason why in most cases you should use graphs instead of tables. </p>
+<p>You can visualize the aggregated data set from above with a simple bar chart in ggplot2:</p>
+<p _="%" endhighlight="endhighlight">{% highlight r %}
+missing.values %&gt;%
+  ggplot() +
+    geom_bar(aes(x=key, y=num.missing), stat = &lsquo;identity&rsquo;) +
+    labs(x=&rsquo;variable&rsquo;, y=&rdquo;number of missing values&rdquo;, title=&rsquo;Number of missing values&rsquo;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</p>
+<p><img alt="plot of chunk unnamed-chunk-10" src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-10-1.png" /></p>
+<p>You can improve this plot by calculating the percentages of missing values for each feature. This is more meaningful. The visual appearance can be improved by swapping the axes to make the feature names more readable. Sorting the bars by it&rsquo;s length is another improvement. Proper axis labeling is always a must. The use of the color red as a visual cue for the missing values (=bad) is used as red stands for danger and that you have to act.</p>
+<p _="%" endhighlight="endhighlight">{% highlight r %}
+missing.values &lt;- df %&gt;%
+  gather(key = &ldquo;key&rdquo;, value = &ldquo;val&rdquo;) %&gt;%
+  mutate(isna = is.na(val)) %&gt;%
+  group_by(key) %&gt;%
+  mutate(total = n()) %&gt;%
+  group_by(key, total, isna) %&gt;%
+  summarise(num.isna = n()) %&gt;%
+  mutate(pct = num.isna / total * 100)</p>
+<p>{% highlight text %}</p>
+<h2><code>summarise()</code> regrouping output by &lsquo;key&rsquo;, &lsquo;total&rsquo; (override with <code>.groups</code> argument)</h2>
+<p>{% endhighlight %}</p>
+<p>{% highlight r %}
+levels &lt;-
+    (missing.values  %&gt;% filter(isna == T) %&gt;% arrange(desc(pct)))$key</p>
+<p>percentage.plot &lt;- missing.values %&gt;%
+      ggplot() +
+        geom_bar(aes(x = reorder(key, desc(pct)), 
+                     y = pct, fill=isna), 
+                 stat = &lsquo;identity&rsquo;, alpha=0.8) +
+      scale_x_discrete(limits = levels) +
+      scale_fill_manual(name = &ldquo;&rdquo;, 
+                        values = c(&lsquo;steelblue&rsquo;, &lsquo;tomato3&rsquo;), labels = c(&ldquo;Present&rdquo;, &ldquo;Missing&rdquo;)) +
+      coord_flip() +
+      labs(title = &ldquo;Percentage of missing values&rdquo;, x =
+             &lsquo;Variable&rsquo;, y = &ldquo;% of missing values&rdquo;)</p>
+<p _="%" endhighlight="endhighlight">percentage.plot</p>
+<p><img alt="plot of chunk unnamed-chunk-11" src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-11-1.png" /></p>
+<p>You aggregate the data in a similar way for this plot as before: Instead of counting you are calculating percentages. The data is then chained to the ggplot visualization part.</p>
+<p>The plot shows you that you have problem in the scraping process with the features for product dimension (dim_x, dim_y, dim_z): Almost 100% of the values are missing. You can see that there is the same amount of missing values for sales.rank, sales and reviews.count. These values seem correlated with each other.</p>
+<p>You can visualize the missing values in another way by plotting each row in the dataset to get further insights.</p>
+<p>{% highlight r %}
+row.plot &lt;- df %&gt;%
+  mutate(id = row_number()) %&gt;%
+  gather(-id, key = &ldquo;key&rdquo;, value = &ldquo;val&rdquo;) %&gt;%
+  mutate(isna = is.na(val)) %&gt;%
+  ggplot(aes(key, id, fill = isna)) +
+    geom_raster(alpha=0.8) +
+    scale_fill_manual(name = &ldquo;&rdquo;,
+        values = c(&lsquo;steelblue&rsquo;, &lsquo;tomato3&rsquo;),
+        labels = c(&ldquo;Present&rdquo;, &ldquo;Missing&rdquo;)) +
+    scale_x_discrete(limits = levels) +
+    labs(x = &ldquo;Variable&rdquo;,
+           y = &ldquo;Row Number&rdquo;, title = &ldquo;Missing values in rows&rdquo;) +
+    coord_flip()</p>
+<p _="%" endhighlight="endhighlight">row.plot</p>
+<p><img alt="plot of chunk unnamed-chunk-12" src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-12-1.png" />
+This plot lets you find patterns which cannot be found with our bar chart. You can see links between missing values for different features.</p>
+<p>The missing values for the features sales_rank and and sales are indeed linked to each other. This is what you expect. In the bar chart you could see that reviews_count has about the same percentage of missing values. You would expect a linkage to sales and sales rank. Our second plot shows that there is no linkage, because the value is missing in different rows.</p>
+<p>You can put the two visualizations into one with the gridExtra package. </p>
+<p _="%" endhighlight="endhighlight">{% highlight r %}
+grid.arrange(percentage.plot, row.plot, ncol = 2)</p>
+<p><img alt="plot of chunk unnamed-chunk-13" src="/figure/source/2019-02-05-visualize_missing_values_with_ggplot/unnamed-chunk-13-1.png" /></p>
+<h3>Conclusion</h3>
+<p>You visualized missing values in a data set in two ways, which provided you different insights on the missing values in the data set.
+This way you could find weak points in the data scraper logic. You could see how the grammar of graphics in ggplot2 and the grammar of data manipulation in dplyr are a very powerful concepts.</p>
+</div>
+<p class="byline">Written on February 5th, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Missing value visualization with tidyverse in R&url=https://jenslaufer.com/data/analysis/visualize_missing_values_with_ggplot.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

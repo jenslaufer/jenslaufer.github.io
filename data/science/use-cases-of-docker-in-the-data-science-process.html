@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example Use Cases of Docker in the Data Science Process | Jens Laufer</title>
+<meta name="description" content="...or how to avoid the It-works-on-my-computer-but-nowhere-else-problem">
+<link rel="canonical" href="https://jenslaufer.com/data/science/use-cases-of-docker-in-the-data-science-process.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Example Use Cases of Docker in the Data Science Process">
+<meta property="og:description" content="...or how to avoid the It-works-on-my-computer-but-nowhere-else-problem">
+<meta property="og:url" content="https://jenslaufer.com/data/science/use-cases-of-docker-in-the-data-science-process.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">April 4, 2019 · 8 minute read</p>
+<h1>Example Use Cases of Docker in the Data Science Process</h1>
+<p class="post-subtitle">...or how to avoid the It-works-on-my-computer-but-nowhere-else-problem</p>
+<figure class="post-hero"><img src="/assets/img/PnvK7v6.png" alt=""></figure>
+<div class="post-body">
+<p>The excellent <a href="http://donthitsave.com/comic/2016/07/15/it-works-on-my-computer">comic by Jeff Lofvers</a> 
+illustrates what you often face in software development but also in data science. You are preparing a data analysis or predictive model, 
+but when you want to share it, then it does not work on someone else machine. It fails, 
+because libraries are missing, libraries are having the wrong version (&ldquo;dependency hell&rdquo;), or configurations are differing. Time-Consuming troubleshooting starts.</p>
+<p>The solution is not far away: <a href="https://www.docker.com/">Docker</a> solves the problem of reproducibility in a lightweight manner, but also offers you many other advantages. </p>
+<p><strong>What is Docker?</strong></p>
+<p>Docker is a free software that performs operating-system-level virtualisation.
+Docker is used to running software packages called containers. Containers are isolated from each other and bundle their application, tools, libraries and configuration files. All containers are run by a single operating system kernel and are thus more lightweight than virtual machines. [<a href="https://en.wikipedia.org/wiki/Docker_(software)">Wikipedia on Docker</a>]</p>
+<p>Docker makes it easy to create, run and distribute applications. Applications are packaged up with everything that is needed to run the application. The concept guarantees that the container can be run on every docker runtime environment.</p>
+<p><strong>Advantages of Docker</strong>:</p>
+<ol>
+<li>
+<p><em>Reproducibility</em></p>
+<p>With Docker, you ensure that your software artefact (application, data analysis, predictive model etc.) runs on all docker runtime environments. Your shipments are more robust, as the container contains everything that&rsquo;s needed to run your artefact. You are not distributing only the code, but also the environment.</p>
+</li>
+<li>
+<p><em>Consistency</em></p>
+<p>Docker equips you with one uniform and consistent runtime environment for all kinds of software artefacts. It reduces the time for system administration and lets you focus on your core work. You might know Anaconda environments; Docker is something similar for the <strong>whole software ecosystem</strong>.</p>
+</li>
+<li>
+<p><em>Traceability</em> </p>
+<p>a.) Version controlling of Docker container code</p>
+<p>A Docker container is built from a script which is a human-readable summary of the necessary software dependencies and environment. This script can be version controlled. The script is entirely traceable this way.</p>
+<p>b.) Uniform distribution environment for all artefacts</p>
+<p>Docker containers can be stored in a repository within your organisation. You keep the whole version history this way.</p>
+</li>
+<li>
+<p><em>Portability</em></p>
+<p>Docker containers can easily be ported from one docker environment to another. <a href="https://docs.docker.com/engine/swarm/">Docker Swarm</a> (or <a href="https://kubernetes.io/">Kubernetes</a>) lets you scale applications automatically. Costs for system administration and operation are reduced this way.</p>
+</li>
+</ol>
+<p>However, what are the use-cases for Docker in the data science universe? I will concentrate on data science <a href="https://www.thelead.io/data-science/5-steps-to-a-data-science-project-lifecycle">OSEMN process</a>: </p>
+<p><img alt="OSEMN: Data Science Process" src="https://www.thelead.io/wp-content/uploads/2019/01/data-science-process-OSEMN-framework.jpg" /></p>
+<h2>Use Cases of Docker in the Data Science Process</h2>
+<p>Reality is today that the process consists of a wide variety of tools and programming languages. Docker is the go-to platform to manage these heterogenous technology stacks, as each container provides the runtime environment it needs to run exactly the one application it is packed around. The interference of technology stacks is reduced this way. </p>
+<h3>1. Obtain: Gather Data from relevant sources</h3>
+<p>Data is the oil for data science. You retrieve it, e.g. from surveys, clinical trials, web scraping, scientific experiments, corporate applications or simulations. Typically data engineers are dealing with the data, but also other stakeholders are involved, which leads to a wide diversity of database systems and programming languages. </p>
+<ul>
+<li>Web scraping: Python application with low-level dependencies to Selenium&rsquo;s Chrome driver and a Postgres database is packed as a multi-container application with <a href="https://docs.docker.com/compose/">Docker Compose</a></li>
+<li>Labelling images: Lean web application with vue.js, a NodeJS backend and a MongoDB is used to label images</li>
+<li>Surveys: Small static microsite build by the marketing team  in plain HTML with an integrated SurveyMonkey form </li>
+<li>Corporate application: Banking web application implemented in AngularJS and Java in the backend with an Oracle database produces valuable banking data from the customers</li>
+<li>Computer simulation: Simulation programmed in C++ stores its results in JSON on Amazon S3 </li>
+<li>Asynchronous data streams:  Car Sensors are sending their data to Kafka, which is distributing the data within the company</li>
+</ul>
+<p>All these technology stacks can be run independently within Docker containers. </p>
+<h3>2. Scrub: Clean and aggregate data to formats the machine understands</h3>
+<p>The Data which was obtained in Step 1 is the oil, but right now it&rsquo;s raw oil. You need to clean, process and combine it to the data you need for analysis and modelling.</p>
+<ul>
+<li>Aggregation: An Application in Java gets the data from Kafka streams, does aggregations on the low-level data and stores it to an Oracle database</li>
+<li>Data analysts clean and preprocess the data from a corporate web application as preparation for answering a business question with an RMarkdown Notebook, which they want to share with the management</li>
+<li>A Machine Learning Engineer combines data from different data sources, cleans and preprocesses data for a predictive model in a Jupyter Notebook </li>
+<li>Data is combined, cleaned, aggregated and preprocessed and persisted for high-level interactive dashboards in Tableau</li>
+</ul>
+<p>Some of these use cases might be already done in the data retrieval step and have more a data engineering technology stack. Other use cases overlap with the exploration and modelling phase and involve technologies more typical for data analytics.</p>
+<p>A lot of data analytics work is done in Notebooks (Jupyter, RMarkdown) which need to be published. You can use a central Jupyter instance for the organisation. The problem with this approach is that you might be stuck with fixed configurations and library versions. Another method would be to publish one or more Notebooks with Docker containers. Then you are more flexible with particular setups.  </p>
+<h3>3. Explore: Find patterns and trends</h3>
+<p>In the exploration phase, all you have to do is to understand what patterns and values are in the hands of the data. You want to make the results available to everyone interested.</p>
+<ul>
+<li>Data Analysts are creating Jupyter or RMarkdown Notebooks to answer a question they need to share with everyone interested in it.</li>
+<li>Data Analysts cluster the companies customers into new segments which are persisted in a Customer Segment Database in MySQL</li>
+<li>Data Analysts build interactive web applications for high-level data exploring for interested stakeholders in RShiny, Dash, Tableau or Kibana. This way managers can find patterns on their own (danger zone!).</li>
+</ul>
+<h3>4. Model: Construct models to predict and forecast</h3>
+<p>The cleaned and preprocessed data is used to train machine or deep learning algorithms. You create models which are a mathematical representation of observed data this way. They can be used for predictions, forecasts and quantification of the ineffable.</p>
+<ul>
+<li>The complete training process for a neural network for object detection in images is isolated to a Docker container that is run on Azure, AWS or Google Cloud</li>
+<li>A Keras model is imported into DeepLearning4J and published as a Java Microservice due to performance issues with Python</li>
+</ul>
+<p>To train neural networks you need a lot of GPU power. You need <a href="https://github.com/NVIDIA/nvidia-docker">Nvidia Docker</a> for isolating the training process to a Docker container, as using GPU cannot be done in a hardware-agnostic and platform-agnostic way.</p>
+<h3>5. Interpret: Put the results into good use</h3>
+<p>The data science insights are communicated and visualised. Models are distributed as microservices.</p>
+<ul>
+<li>Microsites to tell the data story</li>
+<li>A predictive machine learning model in Python is released as microservice</li>
+<li>A REST microservice  in Java with aggregated data is released to paying B2B customers</li>
+<li>A product recommender Service in Python is integrated into the company&rsquo;s web application</li>
+<li>Data-driven stories are  published on the company&rsquo;s Tableau Server and shared for internal and external use</li>
+<li>Data storytellers in the content management team share exciting insights from data analysts on a static Jekyll website </li>
+</ul>
+<h2>Conclusion</h2>
+<p>Docker is a powerful tool also for data scientists and can be applied to all stages in the OSEMN process. You can ship all kind of artefacts in a consistent, reproducible and traceable way. The artefacts can be very different in their technology stack, which is the reality in data science projects. Data engineers work with databases like Oracle, MySQL, MongoDB, Redis or ElasticSearch or programming languages like Java, Python or C++. In the analytics and modelling team, people might work with R, Python, Julia or Scala, while data storytellers tell their story with d3.js in JavaScript or use Tableau. As specialists are rare, it&rsquo;s better to let them work with familiar technologies instead of pushing them into something unknown. You get better results faster. </p>
+<p>Docker is the way to go to manage the heterogeneous technology landscape in data science.</p>
+<h2>References</h2>
+<p><a href="https://kristofclaes.github.io/2016/06/19/running-jekyll-locally-with-docker/">Running Jekyll with Docker</a></p>
+<p><a href="https://www.elastic.co/guide/en/kibana/current/docker.html">Running Kibana on Docker</a></p>
+<p><a href="https://databoss.starschema.net/tableau-server-linux-docker-container/">HOWTO: Tableau Server Linux in Docker Container</a></p>
+<p><a href="https://community.plot.ly/t/running-dash-app-in-docker-container/16067">Running dash app in docker container</a></p>
+<p><a href="https://www.bjoern-hartmann.de/post/learn-how-to-dockerize-a-shinyapp-in-7-steps/">Learn How to Dockerize a ShinyApp in 7 Steps</a></p>
+<p><a href="https://jlintusaari.github.io/2018/07/how-to-compile-rmarkdown-documents-using-docker/">How to compile R Markdown documents using Docker</a></p>
+<p><a href="https://www.dataquest.io/blog/docker-data-science/">Tutorial: Running a Dockerized Jupyter Server for Data Science</a>
+<a href="https://medium.com/@rinu.gour123/kafka-docker-steps-to-run-apache-kafka-using-docker-1645e85acd50">Kafka-Docker: Steps To Run Apache Kafka Using Docker</a></p>
+<p><a href="https://mherman.org/blog/dockerizing-an-angular-app/">Dockerizing an Angular App</a></p>
+<p><a href="https://nodejs.org/de/docs/guides/nodejs-docker-webapp/">Dockerizing a Node.js web app</a></p>
+<p><a href="https://vuejs.org/v2/cookbook/dockerize-vuejs-app.html">Dockerize Vue.js App</a></p>
+<p><a href="https://www.thachmai.info/2015/04/30/running-mongodb-container/">Running MongoDB as a Docker container</a></p>
+<p><a href="https://docs.docker.com/engine/examples/postgresql_service/">Dockerize PostgreSQL</a></p>
+<p><a href="https://cloud.docker.com/repository/docker/jenslaufer/docker-chromedriver-geckodriver">Docker Image with Chromedriver and Geckodriver</a></p>
+<p><a href="https://runnable.com/docker/python/dockerize-your-python-application">Dockerize your Python Application</a></p>
+</div>
+<p class="byline">Written on April 4th, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Example Use Cases of Docker in the Data Science Process&url=https://jenslaufer.com/data/science/use-cases-of-docker-in-the-data-science-process.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

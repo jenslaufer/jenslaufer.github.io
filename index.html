@@ -1,42 +1,73 @@
----
-layout: default
-title: Home
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jens Laufer | writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</title>
+<meta name="description" content="writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports">
+<link rel="canonical" href="https://jenslaufer.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Home">
+<meta property="og:description" content="writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports">
+<meta property="og:url" content="https://jenslaufer.com/">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content">
+<div class="cards"><article class="card">
+<p class="kicker">July 17, 2020 · 8 minute read</p>
+<h2><a href="/entrepreneurship/why-is-it-important-to-validate-business-ideas.html">Why is it important to validate business ideas with Minimal Viable Products (MVP)</a></h2>
+<p class="card-subtitle">4 reasons, why should never build the whole product in one go</p>
+<p class="card-excerpt">In 2006 I started the development of a Unified Messaging Server as a side project; with the server, you were able to send out messages via E-Mail, SMS, Letters, Fax and other channels. The software was quite flexible by using a plugin concept for the different channels. My goal was to sell the… <a href="/entrepreneurship/why-is-it-important-to-validate-business-ideas.html">Read more</a></p>
+</article>
+<article class="card">
+<p class="kicker">June 10, 2020 · 5 minute read</p>
+<h2><a href="/scraping/how_to_avoid_with_proxies_being_blocked_while_scraping_with_proxies.html">How You Avoid Being Blocked While Scraping Websites with Proxies</a></h2>
+<p class="card-subtitle">Different approaches that help you with few changes in code</p>
+<p class="card-excerpt">The last hours I had written a scraper to pull the products of an internet marketplace for a niche analysis. The scraper required some effort because the website uses JavaScript for rendering, so a lot of code is executed in the browser. This circumstance increases the effort needed for scraping a… <a href="/scraping/how_to_avoid_with_proxies_being_blocked_while_scraping_with_proxies.html">Read more</a></p>
+</article>
+<article class="card">
+<p class="kicker">June 10, 2020 · 5 minute read</p>
+<h2><a href="/scraping/wie_du_es_mit_proxys_vermeidest_beim_scraping_geblockt_zu_werden.html">Wie du es mit Proxys vermeidest beim Scrapen geblockt zu werden</a></h2>
+<p class="card-subtitle">Verschiedene Ansätze, die dir mit wenigen Änderungen im Code helfen</p>
+<p class="card-excerpt">Die letzten Stunden hatte ich einen Scraper geschrieben, um die Produkte eines großen Internetmarktplatzes für eine Nischenanalyse zu ziehen. Der Scraper erforderte einigen Aufwand, weil die Website JavaScript für das Rendering verwendet, d.h. viel Code wird erst im Browser ausgeführt. Dies muss… <a href="/scraping/wie_du_es_mit_proxys_vermeidest_beim_scraping_geblockt_zu_werden.html">Read more</a></p>
+</article>
+<article class="card">
+<p class="kicker">September 9, 2019 · 4 minute read</p>
+<h2><a href="/qraptor/qraptor-application-landscape.html">qraptor Technology Stack Part Two: Applications in September 2019</a></h2>
+<p class="card-subtitle">The application we use for our reinforcement trading platform</p>
+<p class="card-excerpt">In Part One: Architecture and Programming Languages we showed you that we using several programming 
+languages to get things done. Today we want to go more into details what applications/micro services for our reinforcement trading platform. It&amp;rsquo;s devided into
+several parts. First, we show you… <a href="/qraptor/qraptor-application-landscape.html">Read more</a></p>
+</article>
+<article class="card">
+<p class="kicker">June 26, 2019 · 2 minute read</p>
+<h2><a href="/business/what-are-some-steps-to-make-an-idea-into-a-product.html">What are some steps to make an idea into a product?</a></h2>
 
-{% for post in paginator.posts %}
-<div class="posts">
-  <h1>
-    <a href="{{ site.github.url }}{{ post.url }}">{{ post.title }}</a>
-  </h1>
-  {% if post.subtitle %}
-  <h3>{{ post.subtitle }}</h3>
-  {% endif %}
-  {% if post.image %}
-  <div class="thumbnail-container">
-    <a href="{{ site.github.url }}{{ post.url }}"><img src="{{ post.image }}"></a>
-  </div>
-  {% endif %}
-  <p>
-    {{ post.content | strip_html | truncate: 350 }} <a href="{{ site.github.url }}{{ post.url }}">Read more</a>
-    <span class="post-date"><i class="fa fa-calendar" aria-hidden="true"></i> {{ post.date | date_to_string }} - <i
-        class="fa fa-clock-o" aria-hidden="true"></i> {% include read-time.html %}</span>
-  </p>
+<p class="card-excerpt">First and foremost: Do not fall into the trap of doing product development for months for a product nobody wants. 
+Know your customers and know where they are hanging around from day 1.
+Follow these steps:
+1.  Answer the question: Who are your customers, and where are they?
+You need to identify… <a href="/business/what-are-some-steps-to-make-an-idea-into-a-product.html">Read more</a></p>
+</article></div><nav class="pagination"><a class="pg" href="/page2/">Older</a><span class="pg off">Newer</span></nav>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
 </div>
-{% endfor %}
-
-<!-- Pagination links -->
-<div class="pagination">
-  {% if paginator.next_page %}
-  <a class="pagination-button pagination-active" href="{{ site.github.url }}{{ paginator.next_page_path }}"
-    class="next">{{ site.data.settings.pagination.previous_page }}</a>
-  {% else %}
-  <span class="pagination-button">{{ site.data.settings.pagination.previous_page }}</span>
-  {% endif %}
-
-  {% if paginator.previous_page %}
-  <a class="pagination-button pagination-active"
-    href="{{ site.baseurl }}{{ paginator.previous_page_path }}">{{ site.data.settings.pagination.next_page }}</a>
-  {% else %}
-  <span class="pagination-button">{{ site.data.settings.pagination.next_page }}</span>
-  {% endif %}
-</div>
+</body>
+</html>

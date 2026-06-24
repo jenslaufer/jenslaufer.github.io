@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wie du es mit Proxys vermeidest beim Scrapen geblockt zu werden | Jens Laufer</title>
+<meta name="description" content="Verschiedene Ansätze, die dir mit wenigen Änderungen im Code helfen">
+<link rel="canonical" href="https://jenslaufer.com/scraping/wie_du_es_mit_proxys_vermeidest_beim_scraping_geblockt_zu_werden.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wie du es mit Proxys vermeidest beim Scrapen geblockt zu werden">
+<meta property="og:description" content="Verschiedene Ansätze, die dir mit wenigen Änderungen im Code helfen">
+<meta property="og:url" content="https://jenslaufer.com/scraping/wie_du_es_mit_proxys_vermeidest_beim_scraping_geblockt_zu_werden.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">June 10, 2020 · 5 minute read</p>
+<h1>Wie du es mit Proxys vermeidest beim Scrapen geblockt zu werden</h1>
+<p class="post-subtitle">Verschiedene Ansätze, die dir mit wenigen Änderungen im Code helfen</p>
+<figure class="post-hero"><img src="https://res.cloudinary.com/jenslaufer/image/upload/c_scale,w_800/v1592394603/anita-jankovic-KGbX1f3Uxtg-unsplash.jpg" alt=""></figure>
+<div class="post-body">
+<p>Die letzten Stunden hatte ich einen Scraper geschrieben, um die Produkte eines großen Internetmarktplatzes für eine Nischenanalyse zu ziehen. Der Scraper erforderte einigen Aufwand, weil die Website JavaScript für das Rendering verwendet, d.h. viel Code wird erst im Browser ausgeführt. Dies muss erhöht den Aufwand beim Scraping. Die Verwendung von Selenium mit einem Headless Chromebrowser brachte schliesslich den Erfolg. Nun kam die Stunde der Wahrheit, ich wollte nun zum ersten Mal Rohdaten im großen Stile ziehen. Voll freudiger Erwartung startete ich meinen Scraper, der die Seiten in meine MongoDB-Datenbank schaufeln sollte. Bald würde ich Daten analysieren könne, Scraping ist der nervige Teil auf dem Weg da hin. Hat man erst einmal die Rohdaten dann ist das die halbe Miete, die Extraktion der interessanten Felder ein Kinderspiel. Durch die Parallelverarbeitung sollte das Ganze recht schnell sein. Während ich gespannt wartete passierte es: Die Größe der Files war auf einmal immer gleich und viel kleiner als am Anfang und&hellip;</p>
+<p><strong>Http Statuscode: 429</strong></p>
+<p>Mir war sofort klar, was passiert war: <strong>Ich war geblockt worden.</strong> Selbstverständlich war ich mir dieser Gefahr von Anfang an bewusst gewesen, aber meine Ungeduld hatte mir wieder einmal einen Strich duch die Rechnung gemacht: Der Versuch die Daten  ohne Massnahmen zu holen war gescheitert. Zwar sind Blocks häufig nur temporär, aber sie verhindern, dass du die Menge an Daten ziehen kannst, die du möchtest. Gerade bei Parallelverarbeitung ist die Gefahr sehr groß. Du solltest dir auch bewusst sein, dass du bei wiederholten Verstössen lebenslang geblockt werden kannst.</p>
+<p>Du fragst dich nun was man genau tun muss, um ein Blocking zu vermeiden. Die Antwort ist einfach: <strong>Du musst beim Scrapen möglichst viele verschiedene IP-Adressen aus unterschiedlichen, welteit verteilten Subnetzen verwenden</strong>. In einer idealen Welt würde ich jeden Zugriff von einer anderen IP-Adresse machen. Das lässt sich schwer realisieren bzw. wäre mit hohem Aufwand verbunden. Im Folgenden möchte ich dir verschiedene Ansätze näher bringen:</p>
+<h3>Der naive Ansatz</h3>
+<p>Eine erste Idee ist es frei zugängliche Proxies zu verwenden, die du sicher auch schon einmal verwendest um deine IP Adresse zu verschleiern. Leider muss ich dich enttäuschen, weil das dich nicht ans Ziel führen wird. Viele dieser Proxies sind nach einiger Zeit nicht mehr verfügbar oder sie sind extrem langsam. Ausserdem bist du nicht der Einzige auf der Welt mit dieser Idee. Meist bekommst du deine Requests nicht mit diesen Proxies durch.</p>
+<h3>Der &ldquo;Mit Kanonen auf Spatzen schiessen&rdquo; Ansatz</h3>
+<p>Als ich das Erstemal vor dem Problem stand, hatte ich die Idee über Cloudservices wie z.B. AWS, Azure oder GCloud eine eigene Proxyfarm aufzusetzen. Beim Durchrechnen wurde mir jedoch schnell klar, dass das nur mit sehr hohen Kosten zu bewerktstelligen ist. Nehmen wir an du möchtest in 20 Threads parallel Daten von einer Websites ziehen und für jeden Thread 10 IP-Adressen zufällig durchrotieren, dann benötigst du dafür 200 IP-Adressen und entsprechende Serverresourcen. Das ist kostenintensiv, ausserdem musst den Aufwand für die Pflege dieser Infrakstruktur einbeziehen. Auf AWS kostet eine IP-Adresse etwa 4 EUR pro Monat. Zusammen mit dem Server macht du also 800-1000 EUR rechenen, dazu noch der Aufwand für Pflege und Wartung deines Systems.</p>
+<h3>Kommerzielle Proxylisten verwenden</h3>
+<p>Eine andere Möglichkeit ist die Kauf von kommerziellen Proxylisten. Du bezahlst eine monatlich Gebühr und erhälst Zugriff auf eine Reihe von Proxies, die du beim Scrapen verwendest. Das funktioniert sehr gut, allerdings musst du deinen Code verändern. Der Aufwand hält sich in Grenzen, was mir jedoch nicht daran gefällt, dass ich die Proxylisten irgendwo vorhalten muss. Ändere ich meinen Vertrag weil ich z.B. mehr Proxies benötige dann muss ich meine lokale Liste nachpflegen. Sicher kann man das z.B in eine getrennte Bibliothek auslagern, aber es ist doch ein wenig unschön. Lange Zeit habe ich <a href="https://proxybonanza.com/?aff_id=831">Bonanza Proxies</a> verwendet und habe die Proxyliste in einem Python module unter <a href="https://github.com/jenslaufer/scrpproxies">scrpproxies on Github</a> ausgelagert. Die Proxies von Bonanza funktionieren sehr gut, jedoch gefiel mir das mit der Bibliothek nie wirklich. Wenn ich ehrlich bin interessieren mich die genauen IP-Adressen nicht und ich möchte auch keinen Code pflegen für so etwas. </p>
+<p>Hie ein kleines Codebeipiel, um einen Request mit einem Proxy abzusetzen. Ichinitialisiere zuerst die den Proxydienst. Über get wählt das Modul zufällig eine Proxyadresse aus, die ich dann für den Request benutze.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">scrpproxies</span><span class="w"> </span><span class="kn">import</span> <span class="n">proxy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="c1"># Initialisation of proxy service with credentials</span>
+<span class="n">proxies</span> <span class="o">=</span> <span class="n">proxy</span><span class="o">.</span><span class="n">BonanzaProxy</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+<span class="c1"># Get returns random proxy ip address</span>
+<span class="n">proxy</span> <span class="o">=</span> <span class="n">proxies</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s1">&#39;http&#39;</span><span class="p">]</span>
+
+<span class="c1"># use proxy for the request</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
+</code></pre></div>
+
+<h3>Proxies per API-Call</h3>
+<p>Etwas eleganter sind APIs, die einem eine Proxyadressen zurücliefern. Das Schöne ist, dass man keine lokalen Proxylisten vorhalten muss. Man setzt einen Request ab und bekommt IP-Adressen, die man dann verwendet. <a href="https://luminati.io/?affiliate=ref_5ee711e0c7669177ab29ff24">Luminati</a> ist ein solcher Dienst, den ich allerdings nur kurz verwendet habe.</p>
+<p>Das ist viel eleganter als die Lösung vorher hat jedoch einen Nachteil. Du setzt einen Request ab, um IP-Adressen zu erhalten, die du dann für den eigentlichen Request verwende. Ich mache also zwei Requests statt einem. Codetechnisch erfordert das zwar ganz ein wenig Boilerplatecode, der allerdings überschaubar ist.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="c1"># Api call to get Proxy</span>
+<span class="n">proxy</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;https://luminati.io/api/get_proxy/key=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+<span class="c1"># use proxy for the request</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
+</code></pre></div>
+
+<h3>Blackbox Call zur Zieladresse</h3>
+<p>Ein viel besserer Ansatz ist, wenn du den verwendeten Proxy gar nicht erst in der deiner Logik handeln musst, weil du dem API-Provider die Ziel-Url übermittlest und dieser den Aufruf abarbeitet. Wenn der Provider dann noch in der Lage ist Seiten mit JavaScript Code über einen Headless Browsern zu rendern, dann kannst du dich voll auf die Extraktion der Daten konzentrieren. 
+Du sparst enorm viel Zeit. Lange Zeit habe ich nach einer solchen API gesucht. Schliesslich bin ich fündig geworden:  <a href="https://www.scraperapi.com?fpr=jens78">ScraperAPI</a> bietet genau die Features, die ich immer gesucht habe.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="c1"># Scraper Api url template</span>
+<span class="n">SCRAPER_API_URL</span> <span class="o">=</span> <span class="s2">&quot;http://api.scraperapi.com?api_key=</span><span class="si">{api_key}</span><span class="s2">&amp;url=</span><span class="si">{url}</span><span class="s2">&quot;</span>
+
+<span class="c1"># target url</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://somesitetoscrape.com&quot;</span>
+
+<span class="c1"># parsed request url</span>
+<span class="n">scraper_url</span> <span class="o">=</span> <span class="n">SCRAPER_API_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+<span class="c1"># fetch target url</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scraper_url</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<p class="byline">Written on June 10th, 2020 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Wie du es mit Proxys vermeidest beim Scrapen geblockt zu werden&url=https://jenslaufer.com/scraping/wie_du_es_mit_proxys_vermeidest_beim_scraping_geblockt_zu_werden.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

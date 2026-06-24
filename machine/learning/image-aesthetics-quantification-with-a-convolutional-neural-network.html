@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image aesthetics quantification with a convolutional neural network (CNN) | Jens Laufer</title>
+<meta name="description" content="Project report for training a MobileNetV1 based convolutional neural network (CNN) with  only 14,000 images with transfer learning">
+<link rel="canonical" href="https://jenslaufer.com/machine/learning/image-aesthetics-quantification-with-a-convolutional-neural-network.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Image aesthetics quantification with a convolutional neural network (CNN)">
+<meta property="og:description" content="Project report for training a MobileNetV1 based convolutional neural network (CNN) with  only 14,000 images with transfer learning">
+<meta property="og:url" content="https://jenslaufer.com/machine/learning/image-aesthetics-quantification-with-a-convolutional-neural-network.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">March 20, 2019 · 18 minute read</p>
+<h1>Image aesthetics quantification with a convolutional neural network (CNN)</h1>
+<p class="post-subtitle">Project report for training a MobileNetV1 based convolutional neural network (CNN) with  only 14,000 images with transfer learning</p>
+<figure class="post-hero"><img src="/assets/img/nima.jpg" alt=""><figcaption>Photo by Jakob Owens on Unsplash</figcaption></figure>
+<div class="post-body">
+<h2>I. Definition</h2>
+<h3>Project Overview</h3>
+<p>The &ldquo;A picture is worth a thousand words&rdquo; stresses how important images
+are in the modern world. The quality of images, e.g. influences our
+decisions in different domains. Especially in eCommerce, where we cannot
+touch things they are essential. They have therefore a significant
+influence on our product purchasing decisions.</p>
+<p><img src="/assets/img/airbnb.png" alt="Which room to book?" width="50%" />
+<i><small>Which room to book?</small></i><br></p>
+<p><img src="/assets/img/date.png" alt="Which guy to date?" width="50%" />
+<i><small>Which guy to date?</small></i><br></p>
+<p><img src="/assets/img/food.png" alt="Which food to order?" width="50%" />
+<i><small>Which food to order?</small></i><br></p>
+<p>The goal of this project is to create a model that can quantify
+the aesthetics of images.</p>
+<h3>Problem Statement</h3>
+<p>The quantification of image quality is an old problem in computer
+vision. There are objective and subjective methods to assess image
+quality. With objective methods, different algorithms quantify the
+distortions and degradations in an image. Subjective methods are based
+on human perception. The methods often don&rsquo;t correlate with each other.
+Objective methods involve traditional rule-based programming, Subjective
+methods are not solvable this way.</p>
+<p>The goal of this project is to develop a subjective method of image
+quality assessment. As mentioned before this problem cannot be solved
+with classical programming. However, it seems that supervised machine
+learning is a perfect candidate for solving the problem as this approach
+learns from examples and it is a way to quantify the ineffable. A
+dataset with image quality annotations is a requirement for learning
+from samples.</p>
+<p>Within the machine learning ecosystem, Convolutional Neural Networks (CNN) are a category of Neural Networks that have proven very effective in areas such as image recognition and classification. They are inspired
+by biological processes in that the connectivity pattern between neurons
+resembles the organisation of the human visual cortex.</p>
+<p>The subjective quality model is implemented with a Convolutional
+Neural Network as it seems an excellent fit to tackle the problem.</p>
+<p>These steps are needed:</p>
+<ol>
+<li>Find a dataset with images with quality annotations</li>
+<li>Exploratory Data Analysis (EDA) on the dataset, to evaluate the characteristics and suitability for the problem space</li>
+<li>Cleanup and preprocessing of the dataset</li>
+<li>Design architecture for the CNN</li>
+<li>Training of the CNN</li>
+<li>Test the model against benchmarks</li>
+<li>Analysis of the results</li>
+</ol>
+<p>There were several iterations for the steps 4.-7.</p>
+<h3>Metrics</h3>
+<p>The distribution of user ratings is predicted in the project. From
+there you can predict both a quantitative mean rating, but also
+a qualitative rating bucket. To capture these two metrics are used.</p>
+<h4>Earth Mover&rsquo;s distance (EMD)</h4>
+<p>The <strong>Earth Mover&rsquo;s Distance (EMD)</strong> is a method to evaluate
+dissimilarity between two multi-dimensional distributions in some
+feature space where a distance measure between single features, which we
+call the ground distance is given. The EMD &lsquo;lifts&rsquo; this distance from
+individual features to full distributions. It&rsquo;s assumed that a well
+performing CNN should predict class distributions such that classes
+closer to the ground truth class should have higher predicted
+probabilities than classes that are further away. For the image quality
+ratings, the scores 4, 5, and 6 are more related than 1, 5, and 10, i.e. the goal is to punish a prediction of 4 more if the actual score is 10 then when the real score is 5. The EMD is defined as the minimum cost to
+transport the mass of one distribution (histogram) to the other. (Hou,
+Yu, and Samaras 2016)(Rubner, Tomasi, and Guibas 2000)(Talebi and
+Milanfar 2018)</p>
+<p><img alt="emd_formula" src="/assets/img/emd.png" /></p>
+<h4>Accuracy</h4>
+<p>To compare qualitative results the <strong>Accuracy</strong> is used. The accuracy is
+the ratio of correct predictions. In this case, the ground-truth and
+predicted mean scores using a threshold of 5 on the &ldquo;official&rdquo; test set,
+as this is the standard practice for AVA dataset.</p>
+<p><img alt="acc_formula" src="/assets/img/acc.png" /></p>
+<h3>Data Exploration</h3>
+<p>The AVA (Aesthetic Visual Analysis) image dataset which was introduced
+by (Murray, Marchesotti, and Perronnin 2012a), (Murray, Marchesotti, and
+Perronnin 2012b) is the reference dataset for all kind of image
+aesthetics. The dataset contains 255508 images, along with a wide range
+of aesthetic, semantic and photographic style annotations. The images
+were collected from www.dpchallenge.com.</p>
+<h4>Sample rows</h4>
+<p><img alt="sample metadata rows" src="/assets/img/sample_rows.png" /></p>
+<h4>Sample images</h4>
+<p><img src="/assets/img/unnamed-chunk-16-1.png" alt="Best rated images"  />
+<i><small>Best rated images</small></i><br></p>
+<p><img src="/assets/img/unnamed-chunk-17-1.png" alt="Worst rated images"  />
+<i><small>Worst rated images</small></i><br></p>
+<h4>Descriptive Statistics of the number of ratings</h4>
+<p><img alt="sample metadata rows" src="/assets/img/num_ratings_summary.png" /></p>
+<h4>Descriptive Statistics of rating.mean</h4>
+<p><img alt="sample metadata rows" src="/assets/img/rating_mean_summary.png" /></p>
+<h3>Exploratory Visualization</h3>
+<h4>Distribution of number of Ratings</h4>
+<p><img src="/assets/img/unnamed-chunk-20-1.png" alt="Number of ratings per image: Majority is rated by more than 100 raters"  /></p>
+<p><i><small>Number of ratings per image: Majority is rated by more than 100 raters</small></i><br></p>
+<p>The number of ratings for the images ranges from 78 to 549 with an average of 210 on a scale from 1 to 10.</p>
+<p>It can be seen that all images are rated by high numbers of raters.
+This is very import as rating an image by its aesthetics is very
+subjective. To level out outliers ratings, a high number of raters is
+needed.</p>
+<h4>Distribution of Mean Ratings</h4>
+<p><img src="/assets/img/unnamed-chunk-21-1.png" alt="Distribution of rating mean"  /></p>
+<p><i><small>Distribution of rating mean</small></i><br></p>
+<p>It can be seen from the distribution and the descriptive statistics that
+50% of images have a rating mean within 4.9 and 5.9, and about 85% are between 3.9 and 6.8. From the boxplot, it can be seen that rating means
+above 7.2 and below 3.5 are outliers in the way that these values are
+scarce.</p>
+<p>This is problematic thas the model performance might not be sufficient for
+images with excellent and lousy quality.</p>
+<h3>Algorithms and Techniques</h3>
+<h4>Convolutional Neural Networks (CNN)</h4>
+<p>A Convolutional Neural Network (CNN) will be used to solve the problem
+of image aesthetics assessment. They are deep neural networks inspired
+by biological processes and most commonly applied to analysing visual
+imagery.</p>
+<p>CNN&rsquo;s consist of an input, an output layer and several hidden layers. The
+hidden layers are typically a convolutional layer followed by a pooling
+layer.</p>
+<p><img src="/assets/img/Typical_cnn.png" alt="Structure of a typical CNN for image classification. The network has multiple filtering kernels for each convolution layer, which extract features. Subsampling or Pooling layers are used for information reduction. (Source Wikipedia)" width="70%" /></p>
+<p><i><small>
+Structure of a typical CNN for image classification. The network has
+multiple filtering kernels for each convolution layer, which extract
+features. Subsampling or Pooling layers are used for information
+reduction. (Source Wikipedia)</small></i><br></p>
+<p><em>Convolutional Layer</em></p>
+<p>The purpose of the convolutional layer is to extract features from the
+input image. They preserve the spatial relationship between pixels by
+learning image features using small squares of input data.</p>
+<p><img src="/assets/img/3_conv.png" alt="Convolutional operation to extract features" width="750" /></p>
+<p><i><small>Convolutional operation to extract features</small></i><br></p>
+<p><em>Pooling Layer</em></p>
+<p>Convolutional networks may include pooling layers. These layers combine
+the outputs of neuron clusters at one layer into a single neuron in the next layer. This is done for the following reasons:</p>
+<ul>
+<li>Reduction of memory and increase in execution speed</li>
+<li>Reduction of overfitting</li>
+</ul>
+<p><img src="/assets/img/Max_pooling.png" alt="MaxPooling layer, that extracts the maximum value in a region to reduce information. (Source Wikipedia)" width="60%" /></p>
+<p><i><small>MaxPooling layer, that extracts the maximum value in a region to reduce
+information. (Source Wikipedia)</small></i><br></p>
+<p><em>Fully connected Layer</em></p>
+<p>After multiple layers of convolutional and pooling layers, a fully
+connected layer completes the network. The fully connected layer is a
+traditional multilayer perceptron responsible for the classification
+task.</p>
+<h4>Transfer Learning</h4>
+<p>Transfer learning is a popular method in computer vision because it
+allows us to build accurate models in a timesaving way (Rawat and Wang
+2017). With transfer learning, instead of starting the learning process
+from scratch, you start from patterns that have been learned when
+solving a different problem. This way you leverage previous learnings
+and avoid starting from scratch.</p>
+<p>In computer vision, transfer learning is usually expressed through the
+use of pre-trained models. A pre-trained model is a model that was
+trained on a large benchmark dataset to solve a problem similar to the
+one that we want to solve. Accordingly, due to the computational cost of
+training such models, it is common practice to import and use models
+from published literature (e.g. VGG, Inception, MobileNet).</p>
+<p><img src="/assets/img/transferlearning.png" alt="Transfer learning" width="50%" /></p>
+<p><i><small>Transfer learning</small></i><br></p>
+<p>Several state-of-the-art image classification applications are based on
+the transfer learning solutions (He et al. 2016), (Szegedy et al. 2016)
+Google reported in its NIMA (Neural Image Assessment) paper the highest
+accuracy with a transfer learning-based model (Talebi and Milanfar 2018)</p>
+<p>The goal of the project is to use the MobileNet architecture with
+ImageNet weights, and the replacement of the last dense layer in
+MobileNet with a dense layer that outputs to 10 classes (scores 1 to
+10), which form together with the rating distribution as suggested by (Talebi and Milanfar 2018)</p>
+<h3>Benchmark</h3>
+<p>Accuracies of different models on the AVA dataset are reported in
+different papers. These accuracies are used for benchmarking the models
+which are created in this project. The benchmarks are based on the
+&ldquo;official&rdquo; AVA test set. The goal is to achieve at least an accuracy of
+68% which is above the lower boundary of the relevant papers for image
+aesthetics.</p>
+<p><img alt="sample metadata rows" src="/assets/img/benchmark.png" /></p>
+<h2>III. Methodology</h2>
+<h3>Data Preprocessing</h3>
+<p>The data preprocessing can be divided into two parts: The first part was
+done during the exploratory data analysis. In this step the following
+checks and cleanings were performed:</p>
+<ol>
+<li>
+<p>Removal of images</p>
+<ul>
+<li>Several images had to be removed from metadata as they did not exist.</li>
+<li>Several corrupted images were identified with a script. The corrupted images were deleted from the metadata.</li>
+</ul>
+</li>
+<li>
+<p>Technical image properties were engineered to check image anomalies</p>
+<p>Several technical image properties (file size, resolution, aspect ratio) were engineered and checked for anomalies. No abnormal images could be identified here with these properties.</p>
+</li>
+</ol>
+<p>The second preprocessing step is performed during training:</p>
+<ol>
+<li>
+<p>Splitting of the data into training and validation set</p>
+<p>10% of the images of the training set are used for validation.</p>
+</li>
+<li>
+<p>Base model specific preprocessing were performed</p>
+<p>Each base model provided by Keras offers a preprocessing function with specific preprocessing steps for this model. This preprocessing step is applied to an ImageGenerator which loads the images for training and model evaluation.</p>
+</li>
+<li>
+<p>Normalisation of distribution</p>
+<p>The rating distribution was normalised because each image was rated
+by a different number of people.</p>
+</li>
+<li>
+<p>Image resizing and random cropping</p>
+<p>The training images are rescaled to 256 x 256 px, and afterwards, a randomly performed crop of 224 x 224 px is extracted. This is reported to reduce overfitting issues. (Talebi and Milanfar 2018)</p>
+</li>
+<li>
+<p>Undersampling of the data</p>
+<p>For earlier training sessions the number of images is reduced by cutting the data in 10 rating bins and taking the top n samples of each bin. This is done because of two reasons: As the computing power is limited. This reduces the time to train the model. Another reason is that the data is unbalanced. There are just a few images with very low and high ratings. It was expected that the undersampling reduces the effect of overfitting to the images around the most common ratings.</p>
+</li>
+</ol>
+<h3>Implementation</h3>
+<p>The goal was to create a clear training script which can be
+parameterised from outside for triggering the different trainings. To
+reduce the lines of code of this training script, it orchestrates the
+building blocks of the training with a pipeline script.</p>
+<ol>
+<li>
+<p>All needed libraries are identified and put into a requirements.txt</p>
+</li>
+<li>
+<p>An internal library to download the AVA images and the metadata is implemented.</p>
+</li>
+<li>
+<p>A training script was created with building blocks for training (loading data, preparing data, train, evaluate)</p>
+</li>
+<li>
+<p>Building blocks of the training script are moved to a pipeline script. The scripts save different artefacts: Model architecture, model weights, training history, time for training, training visualisation</p>
+</li>
+<li>
+<p>A model class is created, which encapsulates the base model and top model and offers helper functions to change optimiser and freeze layers on the fly</p>
+</li>
+<li>
+<p>The EMD loss function is created</p>
+</li>
+<li>
+<p>The image generator is created for loading the images and perform the preprocessing of the images</p>
+</li>
+<li>
+<p>Several helper functions for model evaluation are implemented</p>
+</li>
+</ol>
+<p>The actual training is performed in 2 Steps:</p>
+<ol>
+<li>
+<p>Base model weights are frozen, and just the top model is trained with a higher learning rate</p>
+</li>
+<li>
+<p>Base model weights are unfrozen, and the full network is trained with a lower learning rate</p>
+</li>
+</ol>
+<h4>Model design of the CNN</h4>
+<p>The model consists as mentioned before of two parts. The base model is
+unchanged apart from the first layers which are removed. The model is
+initialised with the ImageNet weights. The ImageNet project is an extensive
+visual database designed for use in visual object recognition software
+research. The weights for this dataset is used as the images are
+similar to the ones in the AVA dataset. For the base model, the
+MobileNet architecture is used as this network is smaller to other
+networks and suitable for mobile and embedded based vision applications
+where there is a lack of computing power. (Howard et al. 2017)</p>
+<p>The top model consists of two layers. The first layer is a dropout layer
+to reduce overfitting, followed by a dense layer with an output size of 10 with a softmax activation to predict the distribution of ratings. An Adam
+optimiser with different learning rates and learning rate decays is used
+for training.</p>
+<p><img src="/assets/img/top_model_plot.png" alt="Design of top model: Dropout Layer for avoiding overfitting, Dense layer with 10 output classes" width="300%" /></p>
+<p><i><small>Design of top model: Dropout Layer for avoiding overfitting, Dense layer
+with 10 output classes</small></i><br></p>
+<h3>Refinement</h3>
+<p>Several parameters were used for model refinement:</p>
+<ul>
+<li>Learning rate for dense layers and all layers</li>
+<li>Learning rate decay for dense layers and all layers</li>
+<li>Number of epochs for dense layers and all layers</li>
+<li>Number of images per rating bin used for training</li>
+<li>Dropout ratio for dropout layer in the top model</li>
+</ul>
+<p>The training is done iteratively: First, the model is trained with
+very few samples and the default values for the parameters above. Then
+the model is trained with more samples, and the parameters are fine-tuned. After the model is trained the loss value and the accuracy are
+calculated for the test set. The accuracy is then compared against the
+accuracy scores from the paper (see section Benchmarks) until a
+sufficient model accuracy was reached.</p>
+<p>The training process is supervised with plots for the loss on the
+training and validation set to check if everything works well and to
+optimise the learning process.</p>
+<p><img src="/assets/img/training_history.png" alt="The plots for training history is used to find the best number of epochs for the two learning phases. During phase 1 validation loss flattens at epoch 5 (4 in plot ) and in phase 2 the val loss flattens at epoch 8 (12 in plot)" width="80%" /></p>
+<p><i><small>
+The plots for training history is used to find the best number of epochs for the two learning phases. During phase 1 validation loss flattens at
+epoch 5 (4 in a plot ) and in phase 2 the val loss flattens at epoch 8 (12
+in plot)</small></i><br></p>
+<h2>IV. Results</h2>
+<h3>Model Evaluation and Validation</h3>
+<p>Out of the different models model8 was chosen as it&rsquo;s EMD loss value is
+the lowest and its accuracy is the highest among all models on the test
+set. The results are trustful, as the test set is the &ldquo;official&rdquo; test
+set for AVA and the model never saw these images during training or
+validation. An interesting fact is that this model performs slightly
+better than model9, which was trained with double the number of training
+images.</p>
+<p><img alt="sample metadata rows" src="/assets/img/models.png" /></p>
+<p>The best model is based on the MobileNet architecture, and the following
+parameters are used. All these parameters seem reasonable:</p>
+<p><img alt="sample metadata rows" src="/assets/img/best_model_parameters.png" /></p>
+<p>It can be seen from the figure below, that the distribution of the
+ground truth mean ratings and the predicted mean ratings are very
+similar for the best model. The model works well for mean ratings
+between 3.5 and 7.5. Ratings below or above these boundaries are not
+covered well by the model. This due the fact, that there are not many
+images with very high and low ratings. So the model is not capable of rating
+these extreme outliers correctly, because of the lack of examples.</p>
+<p><img src="/assets/img/unnamed-chunk-30-1.png" alt="Big figure: Distribution of predicted mean ratings and ground truth rating on the test set. Small figures: Distribution on lower and upper end on the test set."  /></p>
+<p><i><small>
+Big figure: Distribution of pedicted mean ratings and ground truth
+rating on test set. Small figures: Distribution on lower and upper end
+on test set.</small></i><br></p>
+<h3>Justification</h3>
+<p>In comparison to the benchmarks, the model shows a moderate accuracy on
+the reference test set for AVA which is used throughout all models from
+the papers.</p>
+<p>The result is quite impressive, as the model was trained with just
+13914 images. The models in the papers were trained with the full
+training set.</p>
+<p><img alt="sample metadata rows" src="/assets/img/benchmark_with_my_model.png" /></p>
+<h2>V. Conclusion</h2>
+<h3>Free-Form Visualization</h3>
+<p>For a final quick and dirty test the images from the &ldquo;Project Overview&rdquo;
+Section are rated with the model. The images are not part of the AVA
+dataset.</p>
+<p><img src="/assets/img/airbnb.png" alt="Left Image: 4.23 Right image: 3.91" width="50%" /></p>
+<p><i><small>Left Image: 4.23 Right image: 3.91</small></i><br></p>
+<p><img src="/assets/img/date.png" alt="Left Image: 3.27 Right image: 4.00" width="50%" /></p>
+<p><i><small>Left Image: 3.27 Right image: 4.00</small></i><br></p>
+<p><img src="/assets/img/food.png" alt="Left Image: 3.98 Right image: 4.67" width="50%" /></p>
+<p><i><small>LLeft Image: 3.98 Right image: 4.67</small></i><br></p>
+<p>It can be seen, that the images which we as a human being would rate
+better are also rated better by the model, although the food images are
+almost the same quality.</p>
+<h3>Reflection</h3>
+<p>The process used for this project can be summarised using the following
+steps</p>
+<ol>
+<li>A relevant problem was found</li>
+<li>Research for relevant papers was done</li>
+<li>Datasets for the problem were researched, analysed and the best a suitable dataset was selected</li>
+<li>The dataset was cleaned</li>
+<li>Model benchmarks were extracted from papers</li>
+<li>The technical infrastructure for the project was set up</li>
+<li>Models were trained and fine-tuned and checked against the benchmarks, till a good enough model was found, that solves the problem</li>
+</ol>
+<p>The project was very challenging for me as I had limited computing power
+and the dataset is extensive. Till the end, I was not able to train the
+models on the full training set as there were always problems like
+running out of memory and Keras and Tensorflow specific problems. I was
+at some point stuck, as the models poorly performed. After doing an
+additional research round, I found the Nima paper from Google, which was
+so brand new that it wasn&rsquo;t published when I started the project in July.
+The insights from the paper were a breakthrough, especially a usage of
+the Earth Movers Loss and the usage of the MobileNet architecture for the base model. I am very proud that I could get an accuracy which was
+within the boundaries of the relevant papers and mastered a topic that
+is very hot at the moment, primarily as I used fewer images than the
+researchers in the papers.</p>
+<h3>Improvement</h3>
+<p>It&rsquo;s exciting that I did achieve an accuracy within the
+boundaries with my undersampling strategy, which was half born out of
+need. Even after doing the undersampling of the data the distribution of
+the ratings is unbalanced.</p>
+<p>A strategy to even perform better would be to do image augmentation on
+the underrepresented rated images. This is not so easy, as not every
+kind of image augmentation can be used, e.g. darkening an image may affect
+the aesthetics of the image. Another interesting approach would be to
+generate images with very high and low rating with GANs
+(generative-adversarial-networks).</p>
+<p>Another improvement for the project would be to containerise the whole
+process with Docker and Docker NVIDIA. The goal would be to have a
+docker image that automatically downloads the data, does the
+preprocessing of it, does the training and stops the container after
+training. Within this project, this is done with anaconda environments,
+which is less than ideal in my eyes. I had to always switch from my
+local environment to the AWS cloud instance, lost time as the
+environments are not the same. A Docker environment could also be
+optimised with reusable elements for other Deep Learning projects.</p>
+<h2>VI. References</h2>
+<p>He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. “Deep
+Residual Learning for Image Recognition.” In <em>Proceedings of the Ieee
+Conference on Computer Vision and Pattern Recognition</em>, 770–78.</p>
+<p>Hou, Le, Chen-Ping Yu, and Dimitris Samaras. 2016. “Squared Earth
+Mover’s Distance-Based Loss for Training Deep Neural Networks.” <em>arXiv
+Preprint arXiv:1611.05916</em>.</p>
+<p>Howard, Andrew G, Menglong Zhu, Bo Chen, Dmitry Kalenichenko, Weijun
+Wang, Tobias Weyand, Marco Andreetto, and Hartwig Adam. 2017.
+“Mobilenets: Efficient Convolutional Neural Networks for Mobile Vision
+Applications.” <em>arXiv Preprint arXiv:1704.04861</em>.</p>
+<p>Kong, Shu, Xiaohui Shen, Zhe Lin, Radomir Mech, and Charless Fowlkes.
+2016. “Photo Aesthetics Ranking Network with Attributes and Content
+Adaptation.” In <em>European Conference on Computer Vision</em>, 662–79.
+Springer.</p>
+<p>Lu, Xin, Zhe Lin, Hailin Jin, Jianchao Yang, and James Z Wang. 2014.
+“Rapid: Rating Pictorial Aesthetics Using Deep Learning.” In
+<em>Proceedings of the 22nd Acm International Conference on Multimedia</em>,
+457–66. ACM.</p>
+<p>Lu, Xin, Zhe Lin, Xiaohui Shen, Radomir Mech, and James Z Wang. 2015.
+“Deep Multi-Patch Aggregation Network for Image Style, Aesthetics, and
+Quality Estimation.” In <em>Proceedings of the Ieee International
+Conference on Computer Vision</em>, 990–98.</p>
+<p>Murray, Naila, Luca Marchesotti, and Florent Perronnin. 2012a. “AVA: A
+Large-Scale Database for Aesthetic Visual Analysis.”
+<a href="https://github.com/mtobeiyf/ava_downloader">https://github.com/mtobeiyf/ava_downloader</a>.</p>
+<p>———. 2012b. “AVA: A Large-Scale Database for Aesthetic Visual Analysis.”
+In <em>Computer Vision and Pattern Recognition (Cvpr), 2012 Ieee Conference
+on</em>, 2408–15. IEEE.</p>
+<p>Rawat, Waseem, and Zenghui Wang. 2017. “Deep Convolutional Neural
+Networks for Image Classification: A Comprehensive Review.” <em>Neural
+Computation</em> 29 (9). MIT Press: 2352–2449.</p>
+<p>Rubner, Yossi, Carlo Tomasi, and Leonidas J Guibas. 2000. “The Earth
+Mover’s Distance as a Metric for Image Retrieval.” <em>International
+Journal of Computer Vision</em> 40 (2). Springer: 99–121.</p>
+<p>Schwarz, Katharina, Patrick Wieschollek, and Hendrik PA Lensch. 2018.
+“Will People Like Your Image? Learning the Aesthetic Space.” In
+<em>Applications of Computer Vision (Wacv), 2018 Ieee Winter Conference
+on</em>, 2048–57. IEEE.</p>
+<p>Szegedy, Christian, Vincent Vanhoucke, Sergey Ioffe, Jon Shlens, and
+Zbigniew Wojna. 2016. “Rethinking the Inception Architecture for
+Computer Vision.” In <em>Proceedings of the Ieee Conference on Computer
+Vision and Pattern Recognition</em>, 2818–26.</p>
+<p>Talebi, Hossein, and Peyman Milanfar. 2018. “Nima: Neural Image
+Assessment.” <em>IEEE Transactions on Image Processing</em> 27 (8). IEEE:
+3998–4011.</p>
+</div>
+<p class="byline">Written on March 20th, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Image aesthetics quantification with a convolutional neural network (CNN)&url=https://jenslaufer.com/machine/learning/image-aesthetics-quantification-with-a-convolutional-neural-network.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

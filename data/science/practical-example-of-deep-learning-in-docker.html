@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practical example of Training a Neural Network in the AWS cloud with Docker | Jens Laufer</title>
+<meta name="description" content="How to train a shallow neural network on top of an InceptionV3 model on CIFAR-10 within Docker on an AWS GPU-instance">
+<link rel="canonical" href="https://jenslaufer.com/data/science/practical-example-of-deep-learning-in-docker.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Practical example of Training a Neural Network in the AWS cloud with Docker">
+<meta property="og:description" content="How to train a shallow neural network on top of an InceptionV3 model on CIFAR-10 within Docker on an AWS GPU-instance">
+<meta property="og:url" content="https://jenslaufer.com/data/science/practical-example-of-deep-learning-in-docker.html">
+<meta property="og:site_name" content="Jens Laufer">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="application/atom+xml" title="Jens Laufer" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <a class="masthead-title" href="/">Jens Laufer</a>
+  <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+</header>
+<main class="content lead">
+<article class="post">
+<p class="kicker">April 23, 2019 · 13 minute read</p>
+<h1>Practical example of Training a Neural Network in the AWS cloud with Docker</h1>
+<p class="post-subtitle">How to train a shallow neural network on top of an InceptionV3 model on CIFAR-10 within Docker on an AWS GPU-instance</p>
+<figure class="post-hero"><img src="https://res.cloudinary.com/jenslaufer/image/upload/c_scale,w_948/v1556113451/samuel-zeller-358865-unsplash.png" alt=""></figure>
+<div class="post-body">
+<p>My last article <a href="https://jenslaufer.com/data/science/use-cases-of-docker-in-the-data-science-process.html">Example Use Cases of Docker in the Data Science Process</a>  was about Docker in Data Science in general. This time I want to get my hands dirty with a practical example. </p>
+<p>In this case study, I want to show you how to train a shallow neural network on top of a deep InceptionV3 model on CIFAR-10 images within a Docker container on AWS. I am using a standard technology stack for this project with Python, Tensorflow and Keras.  The <a href="https://github.com/jenslaufer/neural-network-training-with-docker">source code for this project</a> is available on Github. </p>
+<p>What you will learn in this case study:</p>
+<ul>
+<li>Setup of GPU empowered cloud instance on AWS from your command line with docker-machine</li>
+<li>Usage of a tensorflow docker image in your Dockerfile</li>
+<li>Setup of a multi-container Docker application for training a neural network with docker-compose</li>
+<li>Setup of a MongoDB as Persistence container for training meta-data and file storage for models</li>
+<li>Simple data inserting and querying with MongoDB</li>
+<li>Some simple docker, docker-compose and docker-machine commands </li>
+<li>Transfer learning of a convolutional neural network (CNN)</li>
+</ul>
+<p>Let&rsquo;s define the requirements for this little project:</p>
+<ul>
+<li>Training must be done in the cloud on a GPU empowered instance in AWS</li>
+<li>Flexibility to port the whole training pipeline also to Google Cloud or Microsoft Azure </li>
+<li>Usage of nvidia-docker to activate the full GPU-power on the cloud instance</li>
+<li>Persistence of models metadata on MongoDB for model reproducibility. </li>
+<li>Usage of docker-compose for the multi-container application (training container + MongoDB)</li>
+<li>Usage of docker-machine to manage the cloud instance and start the training from the local command line with docker-compose</li>
+</ul>
+<p>Let&rsquo;s dive deeper.</p>
+<h3>1. Prerequisites</h3>
+<ol>
+<li>Installation of <a href="https://docs.docker.com/install/">Docker</a> along with <a href="https://docs.docker.com/machine/">Docker Machine</a> and <a href="https://docs.docker.com/compose/">Docker Compose</a> (The tools are installed with the standard docker installation on Mac and Windows)</li>
+<li>Creation of an Account on <a href="https://aws.amazon.com">AWS</a></li>
+<li>Installation and Setup of the <a href="https://github.com/aws/aws-cli">AWS Command Line Client</a></li>
+</ol>
+<h3>2. AWS instance as Docker runtime environment</h3>
+<p>To train the neural network on AWS you first need to set up an instance there. You can do this from the <a href="https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:">AWS Web Console</a> or from the command line with the <a href="https://github.com/aws/aws-cli">AWS Command Line Client</a>.</p>
+<p>I show you a convenient third way with the docker-machine command. The command wraps the drivers for different cloud and local providers. You get a unique interface for the Google Compute Cloud, Microsoft Azure and Amazon AWS this way, which makes it easy to setup instances on the platforms. Keep in mind that once you have set up the instance, you can reuse for other purposes.</p>
+<p>I am creating an AWS instance with Ubuntu 18.04 Linux (ami-0891f5dcc59fc5285) which has <a href="https://developer.nvidia.com/cuda-zone">CUDA 10.1</a> and <a href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> already installed. The components are needed to enable the GPU for the training. The basis for the AMI is a standard AWS Ubuntu 18.04 Linux instance (ami-0a313d6098716f372), which I extended with these components. I shared the image to the public to make life easier.</p>
+<p>I am using the p2.xlarge instance type, which is cheapest GPU instance on AWS. The p2.xlarge instance type equips you with the GPU power of a Tesla K80. </p>
+<div class="codehilite"><pre><span></span><code>docker-machine<span class="w"> </span>create<span class="w"> </span>--driver<span class="w"> </span>amazonec2<span class="w"> </span>--amazonec2-instance-type<span class="w"> </span>p2.xlarge<span class="w"> </span>--amazonec2-ami<span class="w"> </span>ami-0891f5dcc59fc5285<span class="w"> </span>--amazonec2-vpc-id<span class="w"> </span>&lt;YOUR<span class="w"> </span>VPC-ID&gt;<span class="w"> </span>cifar10-deep-learning
+</code></pre></div>
+
+<p>You need a VPC-ID for the setup. You can use the AWS command to get it:</p>
+<div class="codehilite"><pre><span></span><code>aws<span class="w"> </span>ec2<span class="w"> </span>describe-vpcs<span class="w"> </span>--filters<span class="w"> </span><span class="s2">&quot;Name=isDefault, Values=true&quot;</span>
+</code></pre></div>
+
+<p>You can get the VPC-ID as well from the <a href="https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:sort=VpcId">AWS Web Console</a></p>
+<p>For more information check the <a href="https://docs.docker.com/machine/drivers/aws/">Docker Machine with AWS</a> Documentation.</p>
+<p><strong><em>WARNING: The p2.xlarge costs $0.90 per HOUR. Please don&rsquo;t forget to stop the instance after completing your training sessions</em></strong></p>
+<h3>3. Training Script</h3>
+<p>You want to train the neural network with different training parameters to find the best set up. After the training, you test the model quality on the test set. It&rsquo;s a classification problem; I suggest to use the accuracy metric for simplicity. In the end, you persist the training log, model weights and architecture for further usage. Everything is reproducible and traceable this way. </p>
+<p>You can do transfer learning by replacing the top layers of the base model with your shallow network, then you freeze the weights of the base model and perform the training on the whole network.</p>
+<p>I am doing it differently in this case study. I am removing the top layers of the base model, then I feed the images into the base model and persist the resulting features in the MongoDB. Predictions need less computing power than training, and I can reuse the bottleneck features once they are extracted. You train the shallow network on the bottleneck features.</p>
+<p>The input and output requirements for the training script:</p>
+<p><strong>Input</strong></p>
+<p>The Docker container is parameterised from a MongoDB collection with all parameters for a training session. </p>
+<ul>
+<li>loss function</li>
+<li>optimiser</li>
+<li>batch size</li>
+<li>number of epochs</li>
+<li>subset percentage of all samples used for training (used for testing the pipeline with fewer images)</li>
+</ul>
+<p><img alt="Studio 3T Screenshot Input Parameters Files" src="https://res.cloudinary.com/jenslaufer/image/upload/c_scale,w_1700/v1555506062/screenshot_input.png" /></p>
+<p><strong>Output</strong></p>
+<ul>
+<li>Model architecture file</li>
+<li>Model weights file</li>
+<li>Training Session Log</li>
+<li>Model accuracy on the test set</li>
+</ul>
+<p><img alt="Studio 3T Screenshot Output Files" src="https://res.cloudinary.com/jenslaufer/image/upload/c_scale,w_1700/v1555506062/screenshot_output.png" /></p>
+<p>I put the whole training pipeline into one script <a href="https://github.com/jenslaufer/neural-network-training-with-docker/blob/c045323c372bb46535f563c456117a8befa4b05f/src/cnn/cifar10.py">src/cnn/cifar10.py</a> It consists of one class for the whole training pipeline:</p>
+<ol>
+<li>Downloading of the CIFAR-10 images to the container file system.</li>
+<li>Loading of the base model (InceptionV3) with imagenet weights and removal of the top layer</li>
+<li>Extracting of bottleneck features for training and test images; persisting of the features in MongoDB for further usage.</li>
+<li>Creation and Compilation of the shallow neural network; persisting the model architecture in MongoDB </li>
+<li>Training of the shallow model; persisting of model weights and training log in MongoDB</li>
+<li>Model testing on test set; persisting the accuracy metric in MongoDB</li>
+</ol>
+<h3>4. Containerization</h3>
+<h4>a.) Dockerfile</h4>
+<p>Everything you need to train the neural network I put into the Dockerfile, which defines the runtime environment for the training.</p>
+<div class="codehilite"><pre><span></span><code><span class="m">1</span><span class="w">   </span>FROM<span class="w"> </span>tensorflow/tensorflow:1.13.1-gpu-py3<span class="w"> </span>
+<span class="m">2</span><span class="w"> </span>
+<span class="m">3</span><span class="w">   </span>COPY<span class="w"> </span>src<span class="w"> </span>/src
+<span class="m">4</span>
+<span class="m">5</span><span class="w">   </span>WORKDIR<span class="w"> </span>/src
+<span class="m">6</span>
+<span class="m">7</span><span class="w">   </span>RUN<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<span class="m">8</span>
+<span class="m">9</span><span class="w">   </span>ENV<span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s1">&#39;/src/:$PYTHONPATH&#39;</span>
+<span class="m">10</span>
+<span class="m">11</span><span class="w">  </span>ENTRYPOINT<span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;entrypoints/entrypoint.sh&quot;</span><span class="w"> </span><span class="o">]</span>
+</code></pre></div>
+
+<p><em>Line 1: Definition of the base image. The setup and configuration are inherited from this image. An official tensorflow image with python3 and GPU support is used.</em></p>
+<p><em>Line 3: Everything in the local directory src, like the training script and entry point, is copied into the Docker image.</em></p>
+<p><em>Line 5: Container is started in src directory</em></p>
+<p><em>Line 7: Installation of python requirements</em></p>
+<p><em>Line 9: src directory is added to PYTHONPATH to tell python to look for modules in this directory</em></p>
+<p><em>Line 11: Definition of the entry point for the image. This entry point script is executed when the container is started. This script starts our python training script.</em></p>
+<p>The entry point shell script is pretty self-explaining: It starts the python module with no parameters. The module fetches then the training parameter from the MongoDB on startup.</p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+
+python<span class="w"> </span>-m<span class="w"> </span>cnn.cifar10
+</code></pre></div>
+
+<h4>b.) Docker Container Build</h4>
+<p>First, I need to build a Docker image. You can skip this step as I shared the ready-built <a href="https://hub.docker.com/r/jenslaufer/neural-network-training-with-docker/tags">Docker image on Docker Hub</a>. The image is automatically downloaded when it is referenced the first time.</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>jenslaufer/neural-network-training-with-docker<span class="w"> </span>.
+</code></pre></div>
+
+<h4>c.) Multicontainer Application</h4>
+<p>I have two docker containers in my setup: The Docker container for training and a MongoDB for persisting meta-data and as a file server.</p>
+<p>You use docker-compose for this scenario. You define the containers that make your application in a docker-compose.yml</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">1   version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2.3&#39;</span>
+<span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">3   services</span><span class="p">:</span>
+<span class="nt">4     training</span><span class="p">:</span>
+<span class="nt">5       image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jenslaufer/neural-network-training-with-docker:0.1.0-gpu</span>
+<span class="nt">6       container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">neural-network-training-with-docker</span>
+<span class="nt">7       runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia</span>
+<span class="nt">8       depends_on</span><span class="p">:</span>
+<span class="l l-Scalar l-Scalar-Plain">9         - trainingdb</span>
+<span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">11    trainingdb</span><span class="p">:</span>
+<span class="nt">12      image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo:3.6.12</span>
+<span class="nt">13      container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trainingdb</span>
+<span class="nt">14      ports</span><span class="p">:</span>
+<span class="l l-Scalar l-Scalar-Plain">15        - 27018:27017</span>
+<span class="nt">16      command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongod</span>
+</code></pre></div>
+
+<p><em>Line 4-5: Definition of the training container which uses the jenslaufer/neural-network-training-with-docker image with tag 0.1.0-GPU. This image is automatically downloaded from the public Docker Hub repository</em></p>
+<p><em>Line 7: The runtime environment for tensorflow</em></p>
+<p><em>Line 9: The training container needs the trainingdb container for execution. In the code, you use mongodb://trainingdb as Mongo URI</em></p>
+<p><em>Line 11-12: Definition of the MongoDB database. An official mongo image from Docker Hub is used with version 3.6.12</em></p>
+<p><em>Line 14-15: The internal port 27017 is available at port 27018 from outsite</em></p>
+<p><em>Line 16: Mongo daemon is started</em></p>
+<p>You can see that it&rsquo;s straightforward to set up a multi-application with docker compose — you just set up a database with a few lines of code without complicated installation routines.</p>
+<h3>5. Training the neural network</h3>
+<p>You need to execute this command to ensure that the docker commands are going against our AWS instance:</p>
+<div class="codehilite"><pre><span></span><code>docker-machine<span class="w"> </span>env<span class="w"> </span>cifar10-deep-learning
+</code></pre></div>
+
+<p>Afterwards, you can list your machines</p>
+<div class="codehilite"><pre><span></span><code>docker-machine<span class="w"> </span>ls
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>NAME<span class="w">                    </span>ACTIVE<span class="w">   </span>DRIVER<span class="w">      </span>STATE<span class="w">     </span>URL<span class="w">                      </span>SWARM<span class="w">   </span>DOCKER<span class="w">     </span>ERRORS
+cifar10-deep-learning<span class="w">   </span>*<span class="w">        </span>amazonec2<span class="w">   </span>Running<span class="w">   </span>tcp://3.83.26.763:2376<span class="w">           </span>v18.09.5
+</code></pre></div>
+
+<p>Ensure that you see the star for the active environment. It&rsquo;s the environment against all docker commands are executed.
+Keep in mind that you execute the commands in your local shell. It&rsquo;s very convenient.</p>
+<p>You can now start the containers the first time. </p>
+<div class="codehilite"><pre><span></span><code>docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose-gpu.yml<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+
+<p>Docker downloads all images to the AWS instance. The MongoDB started and keep running until you stop the containers. The neural-network-training-with-docker executes the training module. The module fetches the training sessions from the MongoDB, which is empty on the first start.  The container stops after finishing the training sessions.</p>
+<p>Let&rsquo;s add training session parameters.</p>
+<p>You log into the MongoDB container for this (everything from your local shell):</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>trainingdb<span class="w"> </span>bash
+</code></pre></div>
+
+<p>You open the mongo client. Then you are selecting the DB &lsquo;trainings&rsquo; with the use command. You can add then a training session with only 5% of the images, a rmsprop optimizer with a
+batch size of 50 and 20 epochs. It&rsquo;s a quick test if everything works smoothly.</p>
+<div class="codehilite"><pre><span></span><code>root@d27205606e59:/#<span class="w"> </span>mongo
+MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="w"> </span>v3.6.12
+
+&gt;<span class="w"> </span>use<span class="w"> </span>trainings
+switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
+&gt;<span class="w"> </span>db.sessions.insertOne<span class="o">({</span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,<span class="w"> </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.05,<span class="w"> </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,<span class="w"> </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>.0,<span class="w"> </span><span class="s2">&quot;epochs&quot;</span>:<span class="w"> </span><span class="m">20</span><span class="o">})</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;acknowledged&quot;</span><span class="w"> </span>:<span class="w"> </span>true,
+<span class="w">        </span><span class="s2">&quot;insertedId&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cb82c7e552612f42ba7831b&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>You leave the MongoDB and restart the containers:</p>
+<div class="codehilite"><pre><span></span><code>docker-compose<span class="w"> </span>-f<span class="w"> </span>docker-compose-gpu.yml<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+
+<p>The problem is now that you don&rsquo;t see what&rsquo;s going. You can get the logs of a docker container with the docker log command.</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>neural-network-training-with-docker
+</code></pre></div>
+
+<p>You can now follow the training session on the remote docker container on your local machine this way.</p>
+<h3>6. Models Evaluation</h3>
+<p>You can compare the results from the different training sessions quickly with the MongoDB, as I persisted all parameters and the accuracy metric on the test set. The advantage of a database is that you can execute queries against it, which is much better than saving results in CSV or JSON.</p>
+<p>Let&rsquo;s list the three model with the highest accuracy.</p>
+<div class="codehilite"><pre><span></span><code>root@f070523a5d05:/#<span class="w"> </span>mongo
+MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="w"> </span>v3.6.12
+&gt;<span class="w"> </span>use<span class="w"> </span>trainings
+switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
+
+&gt;<span class="w"> </span>db.sessions.find<span class="o">({</span><span class="s2">&quot;accuracy&quot;</span>:<span class="o">{</span><span class="s1">&#39;$exists&#39;</span>:1<span class="o">}})</span>.sort<span class="o">({</span><span class="s2">&quot;accuracy&quot;</span>:-1<span class="o">})</span>.limit<span class="o">(</span><span class="m">4</span><span class="o">)</span>.pretty<span class="o">()</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a452&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;sgd&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8282,
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:05:56.743Z&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a450&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8044,
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T10:59:40.469Z&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a451&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;adam&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7998,
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:02:43.122Z&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a453&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7956,
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:11:25.041Z&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>You can also query the database for the model files for a specific training session. You can see that you have hdf5 files for the model architecture and weights. There is also a JSON file with the training history you can use to analyse the training itself. It can be used to visualise the training process. </p>
+<p>You can load the best model automatically from the MongoDB and ship it in Flask, Spring Boot or Tensorflow Application.</p>
+<div class="codehilite"><pre><span></span><code>root@f070523a5d05:/#<span class="w"> </span>mongo
+MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="w"> </span>v3.6.12
+&gt;<span class="w"> </span>use<span class="w"> </span>trainings
+switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
+&gt;<span class="w"> </span>db.fs.files.find<span class="o">({</span><span class="s1">&#39;session_id&#39;</span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)})</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b030127a90009952c33&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">3298104</span>,
+<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;application/x-hdf&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_arch&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;9fd27e4c8fdca43c89709f144547dfe8&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_arch.hdf5&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:14:59.399Z&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
+<span class="o">}</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b0c0127a90009952c41&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">1621</span>,
+<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;text/json&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>,
+<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;training_history&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;ddaa898e428189af9a3c02865087ed79&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;training_history.json&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:15:08.371Z&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;encoding&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;utf-8&quot;</span>
+<span class="o">}</span>
+<span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b0c0127a90009952c43&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">6584512</span>,
+<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;application/x-hdf&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_weights&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;b8cd48c4b9f17b3230c6890faabc2aac&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_weights.hdf5&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:15:08.415Z&quot;</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>You can download the files to the local filesystem with the mongofiles command.</p>
+<div class="codehilite"><pre><span></span><code>root@f070523a5d05:/#<span class="w"> </span>mongofiles<span class="w"> </span>-d<span class="w"> </span>trainings<span class="w"> </span>get_id<span class="w"> </span><span class="s1">&#39;ObjectId(&quot;5cc01b0c0127a90009952c41&quot;)&#39;</span>
+</code></pre></div>
+
+<h2>Conclusion</h2>
+<p>You set up in this case study a GPU-empowered cloud instance on AWS from the command line with docker-machine. The goal was to train a neural network faster with additional computing power. The instance is reusable for other training containers. </p>
+<p>In the next step, you implemented a script with all steps needed to train a shallow fully connected neural network on top of InceptionV3 model with transfer learning. The script uses a MongoDB instance as a persistence layer to store training metadata and model files. You created a Dockerfile with the infrastructure needed to train the network with Tensorflow on a GPU cloud instance.
+You defined then a multi-container setup with training container and MongoDB container in a docker-compose file.</p>
+<p>You trained the neural network on the AWS cloud within Docker. You started the training from the local command line. You logged from the local command line into the MongoDB to add training sessions and to get insights on the training sessions afterwards.</p>
+<p>Next steps to improve the process:</p>
+<ul>
+<li>The architecture of the shallow neural network is hard coded. It would be better to load it from the persistence layer as well.</li>
+<li>Generic way to use as well other base models than the InceptionV3</li>
+<li>You used the accuracy metric to test the quality of the model. It would be better to find a more generic way to persist more metrics.</li>
+<li>You used the optimisers with default parameters. An improvement would be to load optimiser specific parameters generically.</li>
+<li>A goal could be to remove the Python script from the container and load it as a python module from a repository in the entry point script with the help of environment variables in the docker-compose file.</li>
+</ul>
+<p><em>Do you need advise with your Data Science setup?</em> </p>
+<p><em>Please let me know. Send me a <a href="mailto:jenslaufer@jenslaufer.com">mail</a></em></p>
+</div>
+<p class="byline">Written on April 23rd, 2019 by Jens Laufer</p>
+<p class="share"><a href="https://twitter.com/intent/tweet?text=Practical example of Training a Neural Network in the AWS cloud with Docker&url=https://jenslaufer.com/data/science/practical-example-of-deep-learning-in-docker.html">Feel free to share &rarr;</a></p>
+</article>
+</main>
+<footer class="footer">
+  <nav class="social"><a href="https://www.github.com/jenslaufer" aria-label="github"><i class="fa fa-github"></i></a><a href="https://twitter.com/jenslaufer" aria-label="twitter"><i class="fa fa-twitter"></i></a><a href="http://linkedin.com/in/jens-laufer-2b55b13" aria-label="linkedin"><i class="fa fa-linkedin"></i></a><a href="mailto:jens.laufer@gmail.com" aria-label="envelope"><i class="fa fa-envelope"></i></a><a href="/feed.xml" aria-label="rss-square"><i class="fa fa-rss-square"></i></a></nav>
+  <div class="colophon"><a href="/menu/about.html">Jens Laufer — writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</a></div>
+</footer>
+</div>
+</body>
+</html>

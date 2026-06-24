@@ -68,8 +68,16 @@ def render_md(text):
     return md.markdown(text, extensions=MD_EXT, extension_configs={"codehilite": {"guess_lang": False}})
 
 
+BLOCK_RE = re.compile(r"<(style|script)\b[^>]*>.*?</\1>", re.S | re.I)
+
+
+def strip_html(text):
+    """Plain text from rendered HTML — drops <style>/<script> bodies, not just tags."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", BLOCK_RE.sub(" ", text))).strip()
+
+
 def read_time(text):
-    words = len(re.sub(r"<[^>]+>", "", text).split())
+    words = len(strip_html(text).split())
     if words < 180:
         return "less than 1 minute read"
     if words < 360:
@@ -202,7 +210,7 @@ def build():
         items = []
         for p in chunk:
             sub = f'<p class="card-subtitle">{html.escape(p["subtitle"])}</p>' if p["subtitle"] else ""
-            excerpt = re.sub(r"<[^>]+>", "", p["html"]).strip()
+            excerpt = strip_html(p["html"])
             excerpt = (excerpt[:300].rsplit(" ", 1)[0] + "…") if len(excerpt) > 300 else excerpt
             items.append(f"""<article class="card">
 <p class="kicker">{p['date'].strftime('%B %-d, %Y')} · {p['rt']}</p>

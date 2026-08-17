@@ -26,7 +26,7 @@
 <header class="masthead">
   <a class="masthead-title" href="/">Jens Laufer</a>
   <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
-  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/harry/en/">Harry</a><a href="/malaysia/en/">Malaysia</a></nav>
 </header>
 <main class="content lead">
 <article class="post">
@@ -48,30 +48,30 @@
 </ol>
 <p>In this post I want to shortly compare the code needed for aggregated values site-by-site on a practial example on which I worked recently on: <a href="http://bnbdata.co/products/airbnb_local_market_analysis/">Airbnb Local Market Analysis</a>. In this projects live calendar data for all Airbnb listings for a region are scraped from their website and persisted into a MongoDB. For every day in the calendar there is one document per listing in the database, that looks like this:</p>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">(</span><span class="s2">&quot;5b113b287c9f8e50597db3a6&quot;</span><span class="p">),</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;available&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;loc&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;coordinates&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"_id"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">(</span><span class="s2">"5b113b287c9f8e50597db3a6"</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">"available"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">"loc"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">"type"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"Point"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"coordinates"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="mf">114.139377439</span><span class="p">,</span><span class="w"> </span>
 <span class="w">            </span><span class="mf">22.2862727991</span>
 <span class="w">        </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;local_adjusted_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;native_adjusted_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">510</span><span class="p">),</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;local_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;native_price&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">510.0</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2018-04-29&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;native_currency&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;HKD&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;local_currency&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;EUR&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="s2">&quot;local_price_formatted&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;€57&quot;</span>
+<span class="w">    </span><span class="s2">"price"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">"local_adjusted_price"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"native_adjusted_price"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">510</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"local_price"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">57</span><span class="p">),</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"native_price"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">510.0</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"date"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"2018-04-29"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"native_currency"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"HKD"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"local_currency"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"EUR"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"type"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"default"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="s2">"local_price_formatted"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"€57"</span>
 <span class="w">    </span><span class="p">},</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;max_nights&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">7</span><span class="p">),</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;date&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2018-04-29T00:00:00.000+0000&quot;</span><span class="p">),</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;min_nights&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">2</span><span class="p">),</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">10002239</span><span class="p">)</span>
+<span class="w">    </span><span class="s2">"max_nights"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">7</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">"date"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2018-04-29T00:00:00.000+0000"</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">"min_nights"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">2</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">"id"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">NumberInt</span><span class="p">(</span><span class="mf">10002239</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -83,18 +83,18 @@
 <li>First we want to fetch all listings based on their geolocation. We want all the dates for all listing in an area 100,000 meters around  a geo location:</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;$geoNear&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;near&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Point&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="s">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s">"$geoNear"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">"near"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">"type"</span><span class="o">:</span><span class="w"> </span><span class="s">"Point"</span><span class="p">,</span>
+<span class="w">                </span><span class="s">"coordinates"</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                    </span><span class="m">10.9867379057</span><span class="p">,</span>
 <span class="w">                    </span><span class="m">49.4650778012</span>
 <span class="w">                </span><span class="p">]</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&quot;spherical&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">1</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;maxDistance&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;distanceField&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;dist&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;limit&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span>
+<span class="w">            </span><span class="s">"spherical"</span><span class="o">:</span><span class="w"> </span><span class="m">1</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"maxDistance"</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"distanceField"</span><span class="o">:</span><span class="w"> </span><span class="s">"dist"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"limit"</span><span class="o">:</span><span class="w"> </span><span class="m">100000</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -103,24 +103,24 @@
 <li>Next two helper fields are added. One is the &lsquo;paid_price&rsquo;, which is price that was paid for a booking and 0 in case of a place not booked. The field &lsquo;unavailable&rsquo; is needed as a helper field for calculation the number of unavailable days by replacing the boolean values with binary values.</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">        </span><span class="s">&#39;$addFields&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&#39;paid_price&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">'$addFields'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">'paid_price'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">'$cond'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                    </span><span class="kr">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                        </span><span class="o">$</span><span class="n">eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                            </span><span class="s">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="s">"$available"</span><span class="p">,</span>
 <span class="w">                            </span><span class="n">false</span>
 <span class="w">                        </span><span class="p">]</span>
 <span class="w">                    </span><span class="p">},</span>
-<span class="w">                    </span><span class="n">then</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$price.local_adjusted_price&#39;</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">then</span><span class="o">:</span><span class="w"> </span><span class="s">'$price.local_adjusted_price'</span><span class="p">,</span>
 <span class="w">                    </span><span class="kr">else</span><span class="o">:</span><span class="w"> </span><span class="m">0</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&#39;unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">'unavailable'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">'$cond'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                    </span><span class="kr">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                        </span><span class="o">$</span><span class="n">eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                            </span><span class="s">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="s">"$available"</span><span class="p">,</span>
 <span class="w">                            </span><span class="n">false</span>
 <span class="w">                        </span><span class="p">]</span>
 <span class="w">                    </span><span class="p">},</span>
@@ -137,16 +137,16 @@
 <li>Next we group on the listing id and calculate helper variables for preperation of the final results. We calculate total revenue by adding up alle the paid prices, the number of all days for the group and the number of unavailable days:</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">        </span><span class="s">&#39;$group&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&#39;_id&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$id&#39;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&#39;total_revenue&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$paid_price&#39;</span>
+<span class="w">        </span><span class="s">'$group'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">'_id'</span><span class="o">:</span><span class="w"> </span><span class="s">'$id'</span><span class="p">,</span>
+<span class="w">            </span><span class="s">'total_revenue'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="s">'$paid_price'</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&#39;num_unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s">&#39;$unavailable&#39;</span>
+<span class="w">            </span><span class="s">'num_unavailable'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="s">'$unavailable'</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&#39;num_total&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="m">1</span>
+<span class="w">            </span><span class="s">'num_total'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="m">1</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="p">}</span>
@@ -156,17 +156,17 @@
 <li>Finally we calculate the metrics occupancy and average daily rate</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">        </span><span class="s">&#39;$project&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&#39;occupancy&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">'$project'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">'occupancy'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="o">$</span><span class="n">divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                    </span><span class="s">&quot;$num_unavailable&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&#39;$num_total&#39;</span>
+<span class="w">                    </span><span class="s">"$num_unavailable"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">'$num_total'</span>
 <span class="w">                </span><span class="p">]</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&#39;average_daily_rate&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">'average_daily_rate'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="o">$</span><span class="n">divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                    </span><span class="s">&quot;$total_revenue&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&#39;$num_unavailable&#39;</span>
+<span class="w">                    </span><span class="s">"$total_revenue"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">'$num_unavailable'</span>
 <span class="w">                </span><span class="p">]</span><span class="w"> </span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
@@ -176,39 +176,39 @@
 <p>The final result:</p>
 <div class="codehilite"><pre><span></span><code><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;$geoNear&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s2">&quot;near&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="s2">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"$geoNear"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s2">"near"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"Point"</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">"coordinates"</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                    </span><span class="mf">10.9867379057</span><span class="p">,</span>
 <span class="w">                    </span><span class="mf">49.4650778012</span>
 <span class="w">                </span><span class="p">]</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s2">&quot;spherical&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;maxDistance&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;distanceField&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;dist&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;limit&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span>
+<span class="w">            </span><span class="s2">"spherical"</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"maxDistance"</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"distanceField"</span><span class="o">:</span><span class="w"> </span><span class="s2">"dist"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"limit"</span><span class="o">:</span><span class="w"> </span><span class="mf">100000</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s1">&#39;$addFields&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s1">&#39;paid_price&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s1">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s1">'$addFields'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">'paid_price'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">'$cond'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                    </span><span class="k">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                        </span><span class="nx">$eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                            </span><span class="s2">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="s2">"$available"</span><span class="p">,</span>
 <span class="w">                            </span><span class="kc">false</span>
 <span class="w">                        </span><span class="p">]</span>
 <span class="w">                    </span><span class="p">},</span>
-<span class="w">                    </span><span class="nx">then</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$price.local_adjusted_price&#39;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nx">then</span><span class="o">:</span><span class="w"> </span><span class="s1">'$price.local_adjusted_price'</span><span class="p">,</span>
 <span class="w">                    </span><span class="k">else</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s1">&#39;unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s1">&#39;$cond&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">'unavailable'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">'$cond'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                    </span><span class="k">if</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                        </span><span class="nx">$eq</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                            </span><span class="s2">&quot;$available&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="s2">"$available"</span><span class="p">,</span>
 <span class="w">                            </span><span class="kc">false</span>
 <span class="w">                        </span><span class="p">]</span>
 <span class="w">                    </span><span class="p">},</span>
@@ -219,31 +219,31 @@
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s1">&#39;$group&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s1">&#39;_id&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$id&#39;</span><span class="p">,</span>
-<span class="w">            </span><span class="s1">&#39;total_revenue&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$paid_price&#39;</span>
+<span class="w">        </span><span class="s1">'$group'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">'_id'</span><span class="o">:</span><span class="w"> </span><span class="s1">'$id'</span><span class="p">,</span>
+<span class="w">            </span><span class="s1">'total_revenue'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="s1">'$paid_price'</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s1">&#39;num_unavailable&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;$unavailable&#39;</span>
+<span class="w">            </span><span class="s1">'num_unavailable'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="s1">'$unavailable'</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s1">&#39;num_total&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="s1">&#39;$sum&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span>
+<span class="w">            </span><span class="s1">'num_total'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="s1">'$sum'</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s1">&#39;$project&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s1">&#39;occupancy&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s1">'$project'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">'occupancy'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="nx">$divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                    </span><span class="s2">&quot;$num_unavailable&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s1">&#39;$num_total&#39;</span>
+<span class="w">                    </span><span class="s2">"$num_unavailable"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s1">'$num_total'</span>
 <span class="w">                </span><span class="p">]</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s1">&#39;average_daily_rate&#39;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s1">'average_daily_rate'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="nx">$divide</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                    </span><span class="s2">&quot;$total_revenue&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s1">&#39;$num_unavailable&#39;</span>
+<span class="w">                    </span><span class="s2">"$total_revenue"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s1">'$num_unavailable'</span>
 <span class="w">                </span><span class="p">]</span><span class="w"> </span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
@@ -254,26 +254,26 @@
 <h2>dpylr Framework</h2>
 <p>With R we need to fetch the dates for the listings we are interested in. We could do this by simple fetch everything from the MongoDB and do everything with dplyr. </p>
 <p>In this example we fetch the dates for all the listing near a location. We actually use the first stage from our pipeline on our MongoDB pipeline.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">pipeline</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&#39;[</span>
+<div class="codehilite"><pre><span></span><code><span class="n">pipeline</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">'[</span>
 <span class="s">    {</span>
-<span class="s">        &quot;$geoNear&quot;: {</span>
-<span class="s">            &quot;near&quot;: {</span>
-<span class="s">                &quot;type&quot;: &quot;Point&quot;,</span>
-<span class="s">                &quot;coordinates&quot;: [</span>
+<span class="s">        "$geoNear": {</span>
+<span class="s">            "near": {</span>
+<span class="s">                "type": "Point",</span>
+<span class="s">                "coordinates": [</span>
 <span class="s">                    10.9867379057,</span>
 <span class="s">                    49.4650778012</span>
 <span class="s">                ]</span>
 <span class="s">            },</span>
-<span class="s">            &quot;spherical&quot;: 1,</span>
-<span class="s">            &quot;maxDistance&quot;: 100000,</span>
-<span class="s">            &quot;distanceField&quot;: &quot;dist&quot;,</span>
-<span class="s">            &quot;limit&quot;: 100000</span>
+<span class="s">            "spherical": 1,</span>
+<span class="s">            "maxDistance": 100000,</span>
+<span class="s">            "distanceField": "dist",</span>
+<span class="s">            "limit": 100000</span>
 <span class="s">        }</span>
-<span class="s">    }]&#39;</span>
+<span class="s">    }]'</span>
 
 
 <span class="n">dates.collection</span><span class="w"> </span><span class="o">&lt;-</span>
-<span class="w">  </span><span class="nf">mongo</span><span class="p">(</span><span class="s">&quot;dates&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;airbnb&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mongodb://localhost:27017&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="nf">mongo</span><span class="p">(</span><span class="s">"dates"</span><span class="p">,</span><span class="w"> </span><span class="s">"airbnb"</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"mongodb://localhost:27017"</span><span class="p">)</span>
 <span class="n">dates.df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="n">dates.collection</span><span class="o">$</span><span class="nf">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">))</span>
 </code></pre></div>
 

@@ -20,7 +20,20 @@ DESCRIPTION = "writes about Software Development, Data Science, Entrepreneurship
 AUTHOR = "Jens Laufer"
 PER_PAGE = 5
 
-MENU = [("About", "/menu/about.html"), ("Writing", "/menu/writing.html"), ("Contact", "/menu/contact.html")]
+# Pages that live on this domain but are built from OTHER repos (GitHub Pages
+# serves jenslaufer/<repo> under jenslaufer.com/<repo>/). This generator cannot
+# discover them, so without this list they are orphans: measured 2026-08-17,
+# neither /harry/ nor /malaysia/ was reachable by a single link from any indexed
+# page, and neither stood in sitemap.xml (20 URLs, none of them). A page nobody
+# links to is a page Google does not fetch.
+# (nav label, nav target, [every language variant for the sitemap])
+MICROSITES = [
+    ("Harry", "/harry/en/", ["/harry/", "/harry/en/"]),
+    ("Malaysia", "/malaysia/en/", ["/malaysia/", "/malaysia/en/"]),
+]
+
+MENU = ([("About", "/menu/about.html"), ("Writing", "/menu/writing.html"), ("Contact", "/menu/contact.html")]
+        + [(label, target) for label, target, _ in MICROSITES])
 SOCIAL = [
     ("github", "https://www.github.com/jenslaufer"),
     ("twitter", "https://twitter.com/jenslaufer"),
@@ -254,6 +267,7 @@ def build():
     # --- sitemap + feed ---
     urls = ["/"] + [p["url"] for p in posts] + ["/menu/about.html", "/menu/contact.html", "/menu/writing.html"]
     urls += [f"/page{i+1}/" for i in range(1, n)]
+    urls += [u for _, _, variants in MICROSITES for u in variants]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in urls:

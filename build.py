@@ -23,12 +23,14 @@ PER_PAGE = 5
 # Pages that live on this domain but are built from OTHER repos (GitHub Pages
 # serves jenslaufer/<repo> under jenslaufer.com/<repo>/). This generator cannot
 # discover them, so without this list they are orphans: measured 2026-08-17,
-# neither /harry/ nor /malaysia/ was reachable by a single link from any indexed
+# neither /otto/ nor /malaysia/ was reachable by a single link from any indexed
 # page, and neither stood in sitemap.xml (20 URLs, none of them). A page nobody
-# links to is a page Google does not fetch.
+# links to is a page Google does not fetch. (The repo was renamed from harry to
+# otto on 2026-08-17, before either name reached Google — a colleague had
+# named his own coding agent Harry too.)
 # (nav label, nav target, [every language variant for the sitemap])
 MICROSITES = [
-    ("Harry", "/harry/en/", ["/harry/", "/harry/en/"]),
+    ("Otto", "/otto/en/", ["/otto/", "/otto/en/"]),
     ("Malaysia", "/malaysia/en/", ["/malaysia/", "/malaysia/en/"]),
 ]
 

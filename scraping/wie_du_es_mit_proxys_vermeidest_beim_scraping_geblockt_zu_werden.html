@@ -26,7 +26,7 @@
 <header class="masthead">
   <a class="masthead-title" href="/">Jens Laufer</a>
   <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
-  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a></nav>
 </header>
 <main class="content lead">
 <article class="post">
@@ -53,10 +53,10 @@
 <span class="n">proxies</span> <span class="o">=</span> <span class="n">proxy</span><span class="o">.</span><span class="n">BonanzaProxy</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 
 <span class="c1"># Get returns random proxy ip address</span>
-<span class="n">proxy</span> <span class="o">=</span> <span class="n">proxies</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s1">&#39;http&#39;</span><span class="p">]</span>
+<span class="n">proxy</span> <span class="o">=</span> <span class="n">proxies</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s1">'http'</span><span class="p">]</span>
 
 <span class="c1"># use proxy for the request</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">"http"</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
 </code></pre></div>
 
 <h3>Proxies per API-Call</h3>
@@ -65,10 +65,10 @@
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
 <span class="c1"># Api call to get Proxy</span>
-<span class="n">proxy</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;https://luminati.io/api/get_proxy/key=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+<span class="n">proxy</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"https://luminati.io/api/get_proxy/key=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
 
 <span class="c1"># use proxy for the request</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">"http"</span><span class="p">:</span> <span class="n">proxy</span><span class="p">})</span>
 </code></pre></div>
 
 <h3>Blackbox Call zur Zieladresse</h3>
@@ -77,10 +77,10 @@ Du sparst enorm viel Zeit. Lange Zeit habe ich nach einer solchen API gesucht. S
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
 <span class="c1"># Scraper Api url template</span>
-<span class="n">SCRAPER_API_URL</span> <span class="o">=</span> <span class="s2">&quot;http://api.scraperapi.com?api_key=</span><span class="si">{api_key}</span><span class="s2">&amp;url=</span><span class="si">{url}</span><span class="s2">&quot;</span>
+<span class="n">SCRAPER_API_URL</span> <span class="o">=</span> <span class="s2">"http://api.scraperapi.com?api_key=</span><span class="si">{api_key}</span><span class="s2">&amp;url=</span><span class="si">{url}</span><span class="s2">"</span>
 
 <span class="c1"># target url</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://somesitetoscrape.com&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://somesitetoscrape.com"</span>
 
 <span class="c1"># parsed request url</span>
 <span class="n">scraper_url</span> <span class="o">=</span> <span class="n">SCRAPER_API_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>

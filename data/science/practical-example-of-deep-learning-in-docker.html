@@ -26,7 +26,7 @@
 <header class="masthead">
   <a class="masthead-title" href="/">Jens Laufer</a>
   <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
-  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a></nav>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a></nav>
 </header>
 <main class="content lead">
 <article class="post">
@@ -72,7 +72,7 @@
 </code></pre></div>
 
 <p>You need a VPC-ID for the setup. You can use the AWS command to get it:</p>
-<div class="codehilite"><pre><span></span><code>aws<span class="w"> </span>ec2<span class="w"> </span>describe-vpcs<span class="w"> </span>--filters<span class="w"> </span><span class="s2">&quot;Name=isDefault, Values=true&quot;</span>
+<div class="codehilite"><pre><span></span><code>aws<span class="w"> </span>ec2<span class="w"> </span>describe-vpcs<span class="w"> </span>--filters<span class="w"> </span><span class="s2">"Name=isDefault, Values=true"</span>
 </code></pre></div>
 
 <p>You can get the VPC-ID as well from the <a href="https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:sort=VpcId">AWS Web Console</a></p>
@@ -121,9 +121,9 @@
 <span class="m">6</span>
 <span class="m">7</span><span class="w">   </span>RUN<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 <span class="m">8</span>
-<span class="m">9</span><span class="w">   </span>ENV<span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s1">&#39;/src/:$PYTHONPATH&#39;</span>
+<span class="m">9</span><span class="w">   </span>ENV<span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s1">'/src/:$PYTHONPATH'</span>
 <span class="m">10</span>
-<span class="m">11</span><span class="w">  </span>ENTRYPOINT<span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;entrypoints/entrypoint.sh&quot;</span><span class="w"> </span><span class="o">]</span>
+<span class="m">11</span><span class="w">  </span>ENTRYPOINT<span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">"entrypoints/entrypoint.sh"</span><span class="w"> </span><span class="o">]</span>
 </code></pre></div>
 
 <p><em>Line 1: Definition of the base image. The setup and configuration are inherited from this image. An official tensorflow image with python3 and GPU support is used.</em></p>
@@ -146,7 +146,7 @@ python<span class="w"> </span>-m<span class="w"> </span>cnn.cifar10
 <h4>c.) Multicontainer Application</h4>
 <p>I have two docker containers in my setup: The Docker container for training and a MongoDB for persisting meta-data and as a file server.</p>
 <p>You use docker-compose for this scenario. You define the containers that make your application in a docker-compose.yml</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">1   version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2.3&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">1   version</span><span class="p">:</span><span class="w"> </span><span class="s">'2.3'</span>
 <span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="nt">3   services</span><span class="p">:</span>
 <span class="nt">4     training</span><span class="p">:</span>
@@ -203,10 +203,10 @@ MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="
 
 &gt;<span class="w"> </span>use<span class="w"> </span>trainings
 switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
-&gt;<span class="w"> </span>db.sessions.insertOne<span class="o">({</span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,<span class="w"> </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.05,<span class="w"> </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,<span class="w"> </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>.0,<span class="w"> </span><span class="s2">&quot;epochs&quot;</span>:<span class="w"> </span><span class="m">20</span><span class="o">})</span>
+&gt;<span class="w"> </span>db.sessions.insertOne<span class="o">({</span><span class="s2">"loss"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"categorical_crossentropy"</span>,<span class="w"> </span><span class="s2">"subset_pct"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.05,<span class="w"> </span><span class="s2">"optimizer"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"rmsprop"</span>,<span class="w"> </span><span class="s2">"batch_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>.0,<span class="w"> </span><span class="s2">"epochs"</span>:<span class="w"> </span><span class="m">20</span><span class="o">})</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;acknowledged&quot;</span><span class="w"> </span>:<span class="w"> </span>true,
-<span class="w">        </span><span class="s2">&quot;insertedId&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cb82c7e552612f42ba7831b&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="s2">"acknowledged"</span><span class="w"> </span>:<span class="w"> </span>true,
+<span class="w">        </span><span class="s2">"insertedId"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cb82c7e552612f42ba7831b"</span><span class="o">)</span>
 <span class="o">}</span>
 </code></pre></div>
 
@@ -227,54 +227,54 @@ MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="
 &gt;<span class="w"> </span>use<span class="w"> </span>trainings
 switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
 
-&gt;<span class="w"> </span>db.sessions.find<span class="o">({</span><span class="s2">&quot;accuracy&quot;</span>:<span class="o">{</span><span class="s1">&#39;$exists&#39;</span>:1<span class="o">}})</span>.sort<span class="o">({</span><span class="s2">&quot;accuracy&quot;</span>:-1<span class="o">})</span>.limit<span class="o">(</span><span class="m">4</span><span class="o">)</span>.pretty<span class="o">()</span>
+&gt;<span class="w"> </span>db.sessions.find<span class="o">({</span><span class="s2">"accuracy"</span>:<span class="o">{</span><span class="s1">'$exists'</span>:1<span class="o">}})</span>.sort<span class="o">({</span><span class="s2">"accuracy"</span>:-1<span class="o">})</span>.limit<span class="o">(</span><span class="m">4</span><span class="o">)</span>.pretty<span class="o">()</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a452&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
-<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;sgd&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
-<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
-<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
-<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
-<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8282,
-<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:05:56.743Z&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc03fa4f7d2acdfd7e1a452"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"loss"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"categorical_crossentropy"</span>,
+<span class="w">        </span><span class="s2">"subset_pct"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">"optimizer"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"sgd"</span>,
+<span class="w">        </span><span class="s2">"batch_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">"epochs"</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">"test_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">"train_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">"accuracy"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8282,
+<span class="w">        </span><span class="s2">"date"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T11:05:56.743Z"</span><span class="o">)</span>
 <span class="o">}</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a450&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
-<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
-<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
-<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
-<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
-<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8044,
-<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T10:59:40.469Z&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc03fa4f7d2acdfd7e1a450"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"loss"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"categorical_crossentropy"</span>,
+<span class="w">        </span><span class="s2">"subset_pct"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">"optimizer"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"rmsprop"</span>,
+<span class="w">        </span><span class="s2">"batch_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">"epochs"</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">"test_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">"train_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">"accuracy"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.8044,
+<span class="w">        </span><span class="s2">"date"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T10:59:40.469Z"</span><span class="o">)</span>
 <span class="o">}</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a451&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
-<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;adam&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
-<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
-<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
-<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
-<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7998,
-<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:02:43.122Z&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc03fa4f7d2acdfd7e1a451"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"loss"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"categorical_crossentropy"</span>,
+<span class="w">        </span><span class="s2">"subset_pct"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">"optimizer"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"adam"</span>,
+<span class="w">        </span><span class="s2">"batch_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">50</span>,
+<span class="w">        </span><span class="s2">"epochs"</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">"test_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">"train_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">"accuracy"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7998,
+<span class="w">        </span><span class="s2">"date"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T11:02:43.122Z"</span><span class="o">)</span>
 <span class="o">}</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc03fa4f7d2acdfd7e1a453&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;loss&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;categorical_crossentropy&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;subset_pct&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
-<span class="w">        </span><span class="s2">&quot;optimizer&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;rmsprop&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;batch_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
-<span class="w">        </span><span class="s2">&quot;epochs&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
-<span class="w">        </span><span class="s2">&quot;test_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
-<span class="w">        </span><span class="s2">&quot;train_sample_size&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
-<span class="w">        </span><span class="s2">&quot;accuracy&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7956,
-<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T11:11:25.041Z&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc03fa4f7d2acdfd7e1a453"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"loss"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"categorical_crossentropy"</span>,
+<span class="w">        </span><span class="s2">"subset_pct"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.5,
+<span class="w">        </span><span class="s2">"optimizer"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"rmsprop"</span>,
+<span class="w">        </span><span class="s2">"batch_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">"epochs"</span><span class="w"> </span>:<span class="w"> </span><span class="m">20</span>,
+<span class="w">        </span><span class="s2">"test_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">5000</span>,
+<span class="w">        </span><span class="s2">"train_sample_size"</span><span class="w"> </span>:<span class="w"> </span><span class="m">25000</span>,
+<span class="w">        </span><span class="s2">"accuracy"</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.7956,
+<span class="w">        </span><span class="s2">"date"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T11:11:25.041Z"</span><span class="o">)</span>
 <span class="o">}</span>
 </code></pre></div>
 
@@ -284,45 +284,45 @@ switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </s
 MongoDB<span class="w"> </span>shell<span class="w"> </span>version<span class="w"> </span>v3.6.12
 &gt;<span class="w"> </span>use<span class="w"> </span>trainings
 switched<span class="w"> </span>to<span class="w"> </span>db<span class="w"> </span>trainings
-&gt;<span class="w"> </span>db.fs.files.find<span class="o">({</span><span class="s1">&#39;session_id&#39;</span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)})</span>
+&gt;<span class="w"> </span>db.fs.files.find<span class="o">({</span><span class="s1">'session_id'</span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01ab927d7bcb89d69ab58"</span><span class="o">)})</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b030127a90009952c33&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">3298104</span>,
-<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;application/x-hdf&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_arch&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;9fd27e4c8fdca43c89709f144547dfe8&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_arch.hdf5&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:14:59.399Z&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01b030127a90009952c33"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"length"</span><span class="w"> </span>:<span class="w"> </span><span class="m">3298104</span>,
+<span class="w">        </span><span class="s2">"contentType"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"application/x-hdf"</span>,
+<span class="w">        </span><span class="s2">"type"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"model_arch"</span>,
+<span class="w">        </span><span class="s2">"md5"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"9fd27e4c8fdca43c89709f144547dfe8"</span>,
+<span class="w">        </span><span class="s2">"session_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01ab927d7bcb89d69ab58"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"filename"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"model_arch.hdf5"</span>,
+<span class="w">        </span><span class="s2">"uploadDate"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T08:14:59.399Z"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"chunkSize"</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
 <span class="o">}</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b0c0127a90009952c41&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">1621</span>,
-<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;text/json&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>,
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;training_history&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;ddaa898e428189af9a3c02865087ed79&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;training_history.json&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:15:08.371Z&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;encoding&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;utf-8&quot;</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01b0c0127a90009952c41"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"length"</span><span class="w"> </span>:<span class="w"> </span><span class="m">1621</span>,
+<span class="w">        </span><span class="s2">"contentType"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"text/json"</span>,
+<span class="w">        </span><span class="s2">"chunkSize"</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>,
+<span class="w">        </span><span class="s2">"type"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"training_history"</span>,
+<span class="w">        </span><span class="s2">"md5"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"ddaa898e428189af9a3c02865087ed79"</span>,
+<span class="w">        </span><span class="s2">"session_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01ab927d7bcb89d69ab58"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"filename"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"training_history.json"</span>,
+<span class="w">        </span><span class="s2">"uploadDate"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T08:15:08.371Z"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"encoding"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"utf-8"</span>
 <span class="o">}</span>
 <span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01b0c0127a90009952c43&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;length&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">6584512</span>,
-<span class="w">        </span><span class="s2">&quot;contentType&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;application/x-hdf&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_weights&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;md5&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;b8cd48c4b9f17b3230c6890faabc2aac&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;session_id&quot;</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">&quot;5cc01ab927d7bcb89d69ab58&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;filename&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="s2">&quot;model_weights.hdf5&quot;</span>,
-<span class="w">        </span><span class="s2">&quot;uploadDate&quot;</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">&quot;2019-04-24T08:15:08.415Z&quot;</span><span class="o">)</span>,
-<span class="w">        </span><span class="s2">&quot;chunkSize&quot;</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
+<span class="w">        </span><span class="s2">"_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01b0c0127a90009952c43"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"length"</span><span class="w"> </span>:<span class="w"> </span><span class="m">6584512</span>,
+<span class="w">        </span><span class="s2">"contentType"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"application/x-hdf"</span>,
+<span class="w">        </span><span class="s2">"type"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"model_weights"</span>,
+<span class="w">        </span><span class="s2">"md5"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"b8cd48c4b9f17b3230c6890faabc2aac"</span>,
+<span class="w">        </span><span class="s2">"session_id"</span><span class="w"> </span>:<span class="w"> </span>ObjectId<span class="o">(</span><span class="s2">"5cc01ab927d7bcb89d69ab58"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"filename"</span><span class="w"> </span>:<span class="w"> </span><span class="s2">"model_weights.hdf5"</span>,
+<span class="w">        </span><span class="s2">"uploadDate"</span><span class="w"> </span>:<span class="w"> </span>ISODate<span class="o">(</span><span class="s2">"2019-04-24T08:15:08.415Z"</span><span class="o">)</span>,
+<span class="w">        </span><span class="s2">"chunkSize"</span><span class="w"> </span>:<span class="w"> </span><span class="m">261120</span>
 <span class="o">}</span>
 </code></pre></div>
 
 <p>You can download the files to the local filesystem with the mongofiles command.</p>
-<div class="codehilite"><pre><span></span><code>root@f070523a5d05:/#<span class="w"> </span>mongofiles<span class="w"> </span>-d<span class="w"> </span>trainings<span class="w"> </span>get_id<span class="w"> </span><span class="s1">&#39;ObjectId(&quot;5cc01b0c0127a90009952c41&quot;)&#39;</span>
+<div class="codehilite"><pre><span></span><code>root@f070523a5d05:/#<span class="w"> </span>mongofiles<span class="w"> </span>-d<span class="w"> </span>trainings<span class="w"> </span>get_id<span class="w"> </span><span class="s1">'ObjectId("5cc01b0c0127a90009952c41")'</span>
 </code></pre></div>
 
 <h2>Conclusion</h2>

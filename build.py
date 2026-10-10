@@ -225,7 +225,8 @@ def build():
         items = []
         for p in chunk:
             sub = f'<p class="card-subtitle">{html.escape(p["subtitle"])}</p>' if p["subtitle"] else ""
-            excerpt = strip_html(p["html"])
+            # skip a leading italic-only paragraph (language switch link)
+            excerpt = strip_html(re.sub(r"^\s*<p><em>.*?</em></p>", "", p["html"], count=1, flags=re.S))
             excerpt = (excerpt[:300].rsplit(" ", 1)[0] + "…") if len(excerpt) > 300 else excerpt
             items.append(f"""<article class="card">
 <p class="kicker">{p['date'].strftime('%B %-d, %Y')} · {p['rt']}</p>

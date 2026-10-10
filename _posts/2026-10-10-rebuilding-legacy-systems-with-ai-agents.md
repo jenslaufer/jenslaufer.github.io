@@ -1,7 +1,7 @@
 ---
 title: "Rebuilding Legacy Systems with AI Agents: Verification That Assumes the Agent Cheats"
-subtitle: "Agents leave requirements out and work on the tests. What the studies measured, and the test design that follows from it."
-tags: AI agents, legacy modernization, testing, software development
+subtitle: "Agents leave requirements out and work on the tests. What studies measured when agents rebuild legacy systems, and the verification design that follows."
+tags: legacy systems, AI agents, verification, testing
 categories: software
 layout: post
 language: en
@@ -13,13 +13,13 @@ og_image: /assets/img/legacy-rebuild-ai-agents-og.png
 
 I run an autonomous coding pipeline for my own company every day. Agents pick up tickets, implement them on a branch, and separate tests decide whether the result holds. I have [documented 138 ways this system broke](/entrepreneurship/138-fehlschlaege.html) (German). One of them: a ticket said in bold "Do not add: blog articles". The agent added two and logged that it had decided to override the ticket's scope boundary.
 
-That is a small system. I wanted to know what happens when agents rebuild a large legacy business system, an ERP for example. I have not led such a rebuild. I drafted a method from the studies. Then an AI research agent that had not seen my draft researched current practice, and a third agent compared the two. This post covers what the evidence says and the verification design that follows.
+That is a small system. I wanted to know what happens when agents rebuild a large legacy system, such as an ERP, a billing platform or an insurance core system. I have not led such a rebuild. I drafted a method from the studies. Then an AI research agent that had not seen my draft researched current practice, and a third agent compared the two. This post covers what the evidence says and the verification design that follows.
 
 ### Agents omit more than they invent
 
 A rebuild starts with recovering what the old system does. LLMs read code well, so it is tempting to let them write the requirements.
 
-[UCRBench](https://arxiv.org/abs/2512.13360) measured this on 9 Java projects of up to about 66,000 lines with 556 use cases. The models missed 26–43 % of use cases at subfunction level and 44–65 % at user-goal level. They did worst on domain-specific systems spread over many modules. A vendor's ERP is usually far larger than 66,000 lines and spread over many modules.
+[UCRBench](https://arxiv.org/abs/2512.13360) measured this on 9 Java projects of up to about 66,000 lines with 556 use cases. The models missed 26–43 % of use cases at subfunction level and 44–65 % at user-goal level. They did worst on domain-specific systems spread over many modules. A large legacy system is usually far larger than 66,000 lines and spread over many modules.
 
 A [2026 case study](https://arxiv.org/abs/2608.28972) had Claude Code migrate 12 features of a VB6 ERP to C#. Behavioral equivalence with the old system was 92 % for simple features, 81 % for medium and 47 % for complex ones. Only two features were complex, so the last number rests on little data. The abstract reports 70 %, weighted by instructions; the unweighted per-feature averages are 84 % for persistence, 76 % for business rules and 80 % overall. The failure counts are clearer than the averages: 42 missing adjacent modules, 22 missing database operations, 20 missing rules, 10 missing module integrations, 6 wrong implementations. UI-event validations, implicit filters and global configuration are discussed in the paper but not tallied separately.
 
@@ -57,7 +57,7 @@ Two additions come from the same studies. Equivalence fell to 47 % on complex fe
 
 ### What the evidence does not cover
 
-The research I relied on found no published case of agents rebuilding a system at ERP scale end to end. The design above is assembled from partial evidence: a benchmark on projects up to 66,000 lines, one case study with 12 features, and SWE-bench studies on Python libraries. The METR result has not been tested on large business code bases.
+The research I relied on found no published case of agents rebuilding a system at the scale of large enterprise systems end to end. The design above is assembled from partial evidence: a benchmark on projects up to 66,000 lines, one case study with 12 features, and SWE-bench studies on Python libraries. The METR result has not been tested on large business code bases.
 
 In my reading of the sources, the well-measured successes are mechanical migrations such as Java upgrades and test-framework swaps, and results for rebuilding business logic come mostly from vendors, without an independent baseline. Even the mechanical numbers are often estimates: Google reports [about 50 % time saved](https://arxiv.org/abs/2501.06972) for one migration, int32 to int64 IDs, as an engineer estimate.
 

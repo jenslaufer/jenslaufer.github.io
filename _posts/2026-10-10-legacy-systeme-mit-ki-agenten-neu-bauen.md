@@ -1,7 +1,7 @@
 ---
 title: "Legacy-Systeme mit KI-Agenten neu bauen: Verifikation, die mit einem betrügenden Agenten rechnet"
-subtitle: "Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien gemessen haben und welches Testdesign daraus folgt."
-tags: KI-Agenten, Legacy-Modernisierung, Testen, Softwareentwicklung
+subtitle: "Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien beim Neubau von Legacy-Systemen gemessen haben und welches Verifikationsdesign daraus folgt."
+tags: Legacy-Systeme, KI-Agenten, Verifikation, Testen
 categories: software
 layout: post
 language: de
@@ -13,13 +13,13 @@ og_image: /assets/img/legacy-systeme-ki-agenten-og.png
 
 Für meine eigene Firma läuft jeden Tag eine autonome Coding-Pipeline. Agenten holen sich Tickets, setzen sie auf einem Branch um, und getrennte Tests entscheiden, ob das Ergebnis hält. [138 Arten, auf die dieses System kaputtging](/entrepreneurship/138-fehlschlaege.html), habe ich aufgeschrieben. Eine davon: Im Ticket stand fett „Do not add: blog articles". Der Agent fügte zwei Blogartikel hinzu und protokollierte, er habe entschieden, die Scope-Grenze des Tickets zu überschreiben.
 
-Das ist ein kleines System. Mich interessierte, was passiert, wenn Agenten ein großes Legacy-System neu bauen, etwa ein ERP. Ein solches Projekt habe ich nicht geleitet. Aus den Studien habe ich eine Methode entworfen. Danach recherchierte ein KI-Rechercheagent, der meinen Entwurf nicht kannte, die aktuelle Praxis, und ein dritter Agent verglich beides. Dieser Artikel fasst zusammen, was die Belege sagen und welches Verifikationsdesign daraus folgt.
+Das ist ein kleines System. Mich interessierte, was passiert, wenn Agenten ein großes Legacy-System neu bauen, etwa ein ERP, eine Abrechnungsplattform oder ein Kernsystem einer Versicherung. Ein solches Projekt habe ich nicht geleitet. Aus den Studien habe ich eine Methode entworfen. Danach recherchierte ein KI-Rechercheagent, der meinen Entwurf nicht kannte, die aktuelle Praxis, und ein dritter Agent verglich beides. Dieser Artikel fasst zusammen, was die Belege sagen und welches Verifikationsdesign daraus folgt.
 
 ### Agenten lassen eher weg, als dass sie erfinden
 
 Ein Neubau beginnt damit, herauszufinden, was das alte System tut. LLMs lesen Code gut. Es liegt nahe, sie die Anforderungen schreiben zu lassen.
 
-[UCRBench](https://arxiv.org/abs/2512.13360) hat genau das gemessen: 9 Java-Projekte mit bis zu rund 66.000 Zeilen und 556 Use Cases. Die Modelle übersahen 26–43 % der Use Cases auf Subfunktions-Ebene und 44–65 % auf Ebene der Nutzerziele. Am schwächsten waren sie bei fachspezifischen Systemen mit vielen Modulen. Das ERP eines Softwareherstellers ist meist weit größer als 66.000 Zeilen und auf viele Module verteilt.
+[UCRBench](https://arxiv.org/abs/2512.13360) hat genau das gemessen: 9 Java-Projekte mit bis zu rund 66.000 Zeilen und 556 Use Cases. Die Modelle übersahen 26–43 % der Use Cases auf Subfunktions-Ebene und 44–65 % auf Ebene der Nutzerziele. Am schwächsten waren sie bei fachspezifischen Systemen mit vielen Modulen. Ein großes Legacy-System ist meist weit größer als 66.000 Zeilen und auf viele Module verteilt.
 
 In einer [Fallstudie von 2026](https://arxiv.org/abs/2608.28972) migrierte Claude Code 12 Features eines VB6-ERP nach C#. Das Verhalten stimmte bei einfachen Features zu 92 % mit dem Altsystem überein, bei mittleren zu 81 %, bei komplexen zu 47 %. Komplex waren nur zwei Features, die letzte Zahl steht also auf dünner Basis. Das Abstract nennt 70 %, gewichtet nach Anweisungen; ungewichtet über die Features liegen die Mittelwerte bei 84 % für Persistenz, 76 % für Geschäftsregeln und 80 % gesamt. Klarer als die Mittelwerte sind die Fehlerzahlen: 42 fehlende Nachbarmodule, 22 fehlende Datenbankoperationen, 20 fehlende Regeln, 10 fehlende Modulintegrationen, 6 falsche Implementierungen. Validierungen in UI-Events, implizite Filter und globale Konfiguration beschreibt das Paper, weist sie aber nicht gesondert aus.
 
@@ -57,7 +57,7 @@ Zwei Ergänzungen folgen aus denselben Studien. Bei komplexen Features fiel die 
 
 ### Was die Belege nicht abdecken
 
-Die Recherche, auf die ich mich stütze, fand keinen veröffentlichten Fall, in dem Agenten ein System in ERP-Größe vollständig neu gebaut haben. Das Design oben ist aus Teilbelegen zusammengesetzt: ein Benchmark auf Projekten bis 66.000 Zeilen, eine Fallstudie mit 12 Features, SWE-bench-Studien auf Python-Bibliotheken. Das METR-Ergebnis ist an großen Geschäftsanwendungen nicht geprüft.
+Die Recherche, auf die ich mich stütze, fand keinen veröffentlichten Fall, in dem Agenten ein System in der Größe großer Unternehmenssysteme vollständig neu gebaut haben. Das Design oben ist aus Teilbelegen zusammengesetzt: ein Benchmark auf Projekten bis 66.000 Zeilen, eine Fallstudie mit 12 Features, SWE-bench-Studien auf Python-Bibliotheken. Das METR-Ergebnis ist an großen Geschäftsanwendungen nicht geprüft.
 
 So wie ich die Quellen lese, gibt es gut gemessene Erfolge vor allem bei mechanischen Migrationen wie Java-Upgrades oder dem Wechsel eines Test-Frameworks. Ergebnisse zum Neubau von Geschäftslogik stammen überwiegend von Anbietern, ohne unabhängige Vergleichsbasis. Auch die mechanischen Zahlen sind oft Schätzungen: Google meldet [rund 50 % Zeitersparnis](https://arxiv.org/abs/2501.06972) für eine einzelne Migration, die Umstellung von IDs von int32 auf int64, als Einschätzung der Entwickler.
 

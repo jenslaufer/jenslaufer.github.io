@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 <title>Jens Laufer</title><subtitle>writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</subtitle>
 <link href="https://jenslaufer.com/feed.xml" rel="self"/><link href="https://jenslaufer.com/"/>
-<updated>2026-10-10T15:20:32Z</updated><id>https://jenslaufer.com/</id>
+<updated>2026-10-23T11:05:36Z</updated><id>https://jenslaufer.com/</id>
 <author><name>Jens Laufer</name></author>
 <entry><title>Rebuilding Legacy Systems with AI Agents: Verification That Assumes the Agent Cheats</title><link href="https://jenslaufer.com/software/rebuilding-legacy-systems-with-ai-agents.html"/><id>https://jenslaufer.com/software/rebuilding-legacy-systems-with-ai-agents.html</id><updated>2026-10-10T00:00:00Z</updated><published>2026-10-10T00:00:00Z</published><content type="html">&lt;p&gt;&lt;em&gt;Deutsche Version: &lt;a href=&quot;/software/legacy-systeme-mit-ki-agenten-neu-bauen.html&quot;&gt;Legacy-Systeme mit KI-Agenten neu bauen&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;I run an autonomous coding pipeline for my own company every day. Agents pick up tickets, implement them on a branch, and separate tests decide whether the result holds. I have &lt;a href=&quot;/entrepreneurship/138-fehlschlaege.html&quot;&gt;documented 138 ways this system broke&lt;/a&gt; (German). One of them: a ticket said in bold &amp;ldquo;Do not add: blog articles&amp;rdquo;.</content></entry>

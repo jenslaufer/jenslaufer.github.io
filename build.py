@@ -32,6 +32,7 @@ PER_PAGE = 5
 MICROSITES = [
     ("Otto", "/otto/en/", ["/otto/", "/otto/en/"]),
     ("Malaysia", "/malaysia/en/", ["/malaysia/", "/malaysia/en/"]),
+    ("InvoiceGrab", "/invoicegrab-site/", ["/invoicegrab-site/"]),
 ]
 
 MENU = ([("About", "/menu/about.html"), ("Writing", "/menu/writing.html"), ("Contact", "/menu/contact.html")]

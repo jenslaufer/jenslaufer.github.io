@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Legacy-Systeme mit KI-Agenten neu bauen: Verifikation, die mit einem betrügenden Agenten rechnet | Jens Laufer</title>
-<meta name="description" content="Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien gemessen haben und welches Testdesign daraus folgt.">
+<meta name="description" content="Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien beim Neubau von Legacy-Systemen gemessen haben und welches Verifikationsdesign daraus folgt.">
 <link rel="canonical" href="https://jenslaufer.com/software/legacy-systeme-mit-ki-agenten-neu-bauen.html">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Legacy-Systeme mit KI-Agenten neu bauen: Verifikation, die mit einem betrügenden Agenten rechnet">
-<meta property="og:description" content="Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien gemessen haben und welches Testdesign daraus folgt.">
+<meta property="og:description" content="Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien beim Neubau von Legacy-Systemen gemessen haben und welches Verifikationsdesign daraus folgt.">
 <meta property="og:url" content="https://jenslaufer.com/software/legacy-systeme-mit-ki-agenten-neu-bauen.html">
 <meta property="og:site_name" content="Jens Laufer">
 <meta property="og:image" content="https://jenslaufer.com/assets/img/legacy-systeme-ki-agenten-og.png">
@@ -26,21 +26,21 @@
 <header class="masthead">
   <a class="masthead-title" href="/">Jens Laufer</a>
   <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
-  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a></nav>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a><a href="/invoicegrab-site/">InvoiceGrab</a></nav>
 </header>
 <main class="content lead">
 <article class="post">
 <p class="kicker">October 10, 2026 · 8 minute read</p>
 <h1>Legacy-Systeme mit KI-Agenten neu bauen: Verifikation, die mit einem betrügenden Agenten rechnet</h1>
-<p class="post-subtitle">Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien gemessen haben und welches Testdesign daraus folgt.</p>
+<p class="post-subtitle">Agenten lassen Anforderungen weg und arbeiten an den Tests. Was Studien beim Neubau von Legacy-Systemen gemessen haben und welches Verifikationsdesign daraus folgt.</p>
 
 <div class="post-body">
 <p><em>English version: <a href="/software/rebuilding-legacy-systems-with-ai-agents.html">Rebuilding Legacy Systems with AI Agents</a></em></p>
 <p>Für meine eigene Firma läuft jeden Tag eine autonome Coding-Pipeline. Agenten holen sich Tickets, setzen sie auf einem Branch um, und getrennte Tests entscheiden, ob das Ergebnis hält. <a href="/entrepreneurship/138-fehlschlaege.html">138 Arten, auf die dieses System kaputtging</a>, habe ich aufgeschrieben. Eine davon: Im Ticket stand fett „Do not add: blog articles&rdquo;. Der Agent fügte zwei Blogartikel hinzu und protokollierte, er habe entschieden, die Scope-Grenze des Tickets zu überschreiben.</p>
-<p>Das ist ein kleines System. Mich interessierte, was passiert, wenn Agenten ein großes Legacy-System neu bauen, etwa ein ERP. Ein solches Projekt habe ich nicht geleitet. Aus den Studien habe ich eine Methode entworfen. Danach recherchierte ein KI-Rechercheagent, der meinen Entwurf nicht kannte, die aktuelle Praxis, und ein dritter Agent verglich beides. Dieser Artikel fasst zusammen, was die Belege sagen und welches Verifikationsdesign daraus folgt.</p>
+<p>Das ist ein kleines System. Mich interessierte, was passiert, wenn Agenten ein großes Legacy-System neu bauen, etwa ein ERP, eine Abrechnungsplattform oder ein Kernsystem einer Versicherung. Ein solches Projekt habe ich nicht geleitet. Aus den Studien habe ich eine Methode entworfen. Danach recherchierte ein KI-Rechercheagent, der meinen Entwurf nicht kannte, die aktuelle Praxis, und ein dritter Agent verglich beides. Dieser Artikel fasst zusammen, was die Belege sagen und welches Verifikationsdesign daraus folgt.</p>
 <h3>Agenten lassen eher weg, als dass sie erfinden</h3>
 <p>Ein Neubau beginnt damit, herauszufinden, was das alte System tut. LLMs lesen Code gut. Es liegt nahe, sie die Anforderungen schreiben zu lassen.</p>
-<p><a href="https://arxiv.org/abs/2512.13360">UCRBench</a> hat genau das gemessen: 9 Java-Projekte mit bis zu rund 66.000 Zeilen und 556 Use Cases. Die Modelle übersahen 26–43 % der Use Cases auf Subfunktions-Ebene und 44–65 % auf Ebene der Nutzerziele. Am schwächsten waren sie bei fachspezifischen Systemen mit vielen Modulen. Das ERP eines Softwareherstellers ist meist weit größer als 66.000 Zeilen und auf viele Module verteilt.</p>
+<p><a href="https://arxiv.org/abs/2512.13360">UCRBench</a> hat genau das gemessen: 9 Java-Projekte mit bis zu rund 66.000 Zeilen und 556 Use Cases. Die Modelle übersahen 26–43 % der Use Cases auf Subfunktions-Ebene und 44–65 % auf Ebene der Nutzerziele. Am schwächsten waren sie bei fachspezifischen Systemen mit vielen Modulen. Ein großes Legacy-System ist meist weit größer als 66.000 Zeilen und auf viele Module verteilt.</p>
 <p>In einer <a href="https://arxiv.org/abs/2608.28972">Fallstudie von 2026</a> migrierte Claude Code 12 Features eines VB6-ERP nach C#. Das Verhalten stimmte bei einfachen Features zu 92 % mit dem Altsystem überein, bei mittleren zu 81 %, bei komplexen zu 47 %. Komplex waren nur zwei Features, die letzte Zahl steht also auf dünner Basis. Das Abstract nennt 70 %, gewichtet nach Anweisungen; ungewichtet über die Features liegen die Mittelwerte bei 84 % für Persistenz, 76 % für Geschäftsregeln und 80 % gesamt. Klarer als die Mittelwerte sind die Fehlerzahlen: 42 fehlende Nachbarmodule, 22 fehlende Datenbankoperationen, 20 fehlende Regeln, 10 fehlende Modulintegrationen, 6 falsche Implementierungen. Validierungen in UI-Events, implizite Filter und globale Konfiguration beschreibt das Paper, weist sie aber nicht gesondert aus.</p>
 <p>94 der 100 gezählten Fehler sind etwas, das fehlt; 6 sind falsche Implementierungen. Der vorhandene Code wirkt vollständig, und wer ihn reviewt, sieht nicht, was fehlt. Auslassungen findet man nur, wenn man den Recall gegen eine Menge misst, die ohne das Modell entstanden ist.</p>
 <h3>Agenten arbeiten an den Tests</h3>
@@ -65,7 +65,7 @@
 </ol>
 <p>Zwei Ergänzungen folgen aus denselben Studien. Bei komplexen Features fiel die Übereinstimmung auf 47 %, also zerlegt man komplexe Prozesse vor dem Bau in kleinere Einheiten. Und aufgezeichnete Fälle können Zweige verfehlen. Der <a href="https://arxiv.org/abs/2607.28271">Locksmith-Loop-Preprint</a> ließ COBOL und generiertes Java nebeneinander laufen und suchte gezielt Eingaben für nicht abgedeckte Zweige. Er erreichte 91,9 % Zweigabdeckung bei einem internen Programm. Blinde Flecken laut den Autoren: Zwischenzustände und Rundung bei Gleitkommazahlen.</p>
 <h3>Was die Belege nicht abdecken</h3>
-<p>Die Recherche, auf die ich mich stütze, fand keinen veröffentlichten Fall, in dem Agenten ein System in ERP-Größe vollständig neu gebaut haben. Das Design oben ist aus Teilbelegen zusammengesetzt: ein Benchmark auf Projekten bis 66.000 Zeilen, eine Fallstudie mit 12 Features, SWE-bench-Studien auf Python-Bibliotheken. Das METR-Ergebnis ist an großen Geschäftsanwendungen nicht geprüft.</p>
+<p>Die Recherche, auf die ich mich stütze, fand keinen veröffentlichten Fall, in dem Agenten ein System in der Größe großer Unternehmenssysteme vollständig neu gebaut haben. Das Design oben ist aus Teilbelegen zusammengesetzt: ein Benchmark auf Projekten bis 66.000 Zeilen, eine Fallstudie mit 12 Features, SWE-bench-Studien auf Python-Bibliotheken. Das METR-Ergebnis ist an großen Geschäftsanwendungen nicht geprüft.</p>
 <p>So wie ich die Quellen lese, gibt es gut gemessene Erfolge vor allem bei mechanischen Migrationen wie Java-Upgrades oder dem Wechsel eines Test-Frameworks. Ergebnisse zum Neubau von Geschäftslogik stammen überwiegend von Anbietern, ohne unabhängige Vergleichsbasis. Auch die mechanischen Zahlen sind oft Schätzungen: Google meldet <a href="https://arxiv.org/abs/2501.06972">rund 50 % Zeitersparnis</a> für eine einzelne Migration, die Umstellung von IDs von int32 auf int64, als Einschätzung der Entwickler.</p>
 <p>Automatisierungsquote ist nicht Zeitersparnis. <a href="https://slack.engineering/balancing-old-tricks-with-new-feats-ai-powered-conversion-from-enzyme-to-react-testing-library-at-slack/">Slacks Werkzeug</a> konvertierte in einer Stichprobe rund 80 % des Testcodes korrekt; das Team schätzt die eingesparte Entwicklerzeit auf 22 %. In einer <a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/">Studie von METR</a> waren erfahrene Entwickler mit Werkzeugen von Anfang 2025 19 % langsamer und hielten sich für 20 % schneller. Durchlaufzeiten muss man messen; eine Umfrage im Team liefert die falsche Zahl.</p>
 <p>Außerdem verschieben sich die Ergebnisse mit jeder Modellgeneration. Die Betrugsquoten in ImpossibleBench hängen vom Modell und vom Prompt ab.</p>

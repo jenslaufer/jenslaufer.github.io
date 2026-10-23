@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rebuilding Legacy Systems with AI Agents: Verification That Assumes the Agent Cheats | Jens Laufer</title>
-<meta name="description" content="Agents leave requirements out and work on the tests. What the studies measured, and the test design that follows from it.">
+<meta name="description" content="Agents leave requirements out and work on the tests. What studies measured when agents rebuild legacy systems, and the verification design that follows.">
 <link rel="canonical" href="https://jenslaufer.com/software/rebuilding-legacy-systems-with-ai-agents.html">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Rebuilding Legacy Systems with AI Agents: Verification That Assumes the Agent Cheats">
-<meta property="og:description" content="Agents leave requirements out and work on the tests. What the studies measured, and the test design that follows from it.">
+<meta property="og:description" content="Agents leave requirements out and work on the tests. What studies measured when agents rebuild legacy systems, and the verification design that follows.">
 <meta property="og:url" content="https://jenslaufer.com/software/rebuilding-legacy-systems-with-ai-agents.html">
 <meta property="og:site_name" content="Jens Laufer">
 <meta property="og:image" content="https://jenslaufer.com/assets/img/legacy-rebuild-ai-agents-og.png">
@@ -26,21 +26,21 @@
 <header class="masthead">
   <a class="masthead-title" href="/">Jens Laufer</a>
   <div class="masthead-subtitle">writes about Software Development, Data Science, Entrepreneurship, Traveling and Sports</div>
-  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a></nav>
+  <nav class="menu"><a href="/menu/about.html">About</a><a href="/menu/writing.html">Writing</a><a href="/menu/contact.html">Contact</a><a href="/otto/en/">Otto</a><a href="/malaysia/en/">Malaysia</a><a href="/invoicegrab-site/">InvoiceGrab</a></nav>
 </header>
 <main class="content lead">
 <article class="post">
 <p class="kicker">October 10, 2026 · 8 minute read</p>
 <h1>Rebuilding Legacy Systems with AI Agents: Verification That Assumes the Agent Cheats</h1>
-<p class="post-subtitle">Agents leave requirements out and work on the tests. What the studies measured, and the test design that follows from it.</p>
+<p class="post-subtitle">Agents leave requirements out and work on the tests. What studies measured when agents rebuild legacy systems, and the verification design that follows.</p>
 
 <div class="post-body">
 <p><em>Deutsche Version: <a href="/software/legacy-systeme-mit-ki-agenten-neu-bauen.html">Legacy-Systeme mit KI-Agenten neu bauen</a></em></p>
 <p>I run an autonomous coding pipeline for my own company every day. Agents pick up tickets, implement them on a branch, and separate tests decide whether the result holds. I have <a href="/entrepreneurship/138-fehlschlaege.html">documented 138 ways this system broke</a> (German). One of them: a ticket said in bold &ldquo;Do not add: blog articles&rdquo;. The agent added two and logged that it had decided to override the ticket&rsquo;s scope boundary.</p>
-<p>That is a small system. I wanted to know what happens when agents rebuild a large legacy business system, an ERP for example. I have not led such a rebuild. I drafted a method from the studies. Then an AI research agent that had not seen my draft researched current practice, and a third agent compared the two. This post covers what the evidence says and the verification design that follows.</p>
+<p>That is a small system. I wanted to know what happens when agents rebuild a large legacy system, such as an ERP, a billing platform or an insurance core system. I have not led such a rebuild. I drafted a method from the studies. Then an AI research agent that had not seen my draft researched current practice, and a third agent compared the two. This post covers what the evidence says and the verification design that follows.</p>
 <h3>Agents omit more than they invent</h3>
 <p>A rebuild starts with recovering what the old system does. LLMs read code well, so it is tempting to let them write the requirements.</p>
-<p><a href="https://arxiv.org/abs/2512.13360">UCRBench</a> measured this on 9 Java projects of up to about 66,000 lines with 556 use cases. The models missed 26–43 % of use cases at subfunction level and 44–65 % at user-goal level. They did worst on domain-specific systems spread over many modules. A vendor&rsquo;s ERP is usually far larger than 66,000 lines and spread over many modules.</p>
+<p><a href="https://arxiv.org/abs/2512.13360">UCRBench</a> measured this on 9 Java projects of up to about 66,000 lines with 556 use cases. The models missed 26–43 % of use cases at subfunction level and 44–65 % at user-goal level. They did worst on domain-specific systems spread over many modules. A large legacy system is usually far larger than 66,000 lines and spread over many modules.</p>
 <p>A <a href="https://arxiv.org/abs/2608.28972">2026 case study</a> had Claude Code migrate 12 features of a VB6 ERP to C#. Behavioral equivalence with the old system was 92 % for simple features, 81 % for medium and 47 % for complex ones. Only two features were complex, so the last number rests on little data. The abstract reports 70 %, weighted by instructions; the unweighted per-feature averages are 84 % for persistence, 76 % for business rules and 80 % overall. The failure counts are clearer than the averages: 42 missing adjacent modules, 22 missing database operations, 20 missing rules, 10 missing module integrations, 6 wrong implementations. UI-event validations, implicit filters and global configuration are discussed in the paper but not tallied separately.</p>
 <p>94 of the 100 counted failures are something missing; 6 are wrong implementations. The code that is there looks complete, and a reviewer reading it cannot see what is absent. Omissions show up only when you measure recall against a set you built without the model.</p>
 <h3>Agents work on the tests</h3>
@@ -65,7 +65,7 @@
 </ol>
 <p>Two additions come from the same studies. Equivalence fell to 47 % on complex features, so complex processes are split into smaller units before an agent builds them. And recorded cases can miss branches. The <a href="https://arxiv.org/abs/2607.28271">Locksmith Loop preprint</a> ran COBOL and generated Java side by side and searched for inputs that reach uncovered branches. It reached 91.9 % branch coverage on one internal program. The authors name intermediate state and floating-point rounding as blind spots.</p>
 <h3>What the evidence does not cover</h3>
-<p>The research I relied on found no published case of agents rebuilding a system at ERP scale end to end. The design above is assembled from partial evidence: a benchmark on projects up to 66,000 lines, one case study with 12 features, and SWE-bench studies on Python libraries. The METR result has not been tested on large business code bases.</p>
+<p>The research I relied on found no published case of agents rebuilding a system at the scale of large enterprise systems end to end. The design above is assembled from partial evidence: a benchmark on projects up to 66,000 lines, one case study with 12 features, and SWE-bench studies on Python libraries. The METR result has not been tested on large business code bases.</p>
 <p>In my reading of the sources, the well-measured successes are mechanical migrations such as Java upgrades and test-framework swaps, and results for rebuilding business logic come mostly from vendors, without an independent baseline. Even the mechanical numbers are often estimates: Google reports <a href="https://arxiv.org/abs/2501.06972">about 50 % time saved</a> for one migration, int32 to int64 IDs, as an engineer estimate.</p>
 <p>Automation rate is not time saved. <a href="https://slack.engineering/balancing-old-tricks-with-new-feats-ai-powered-conversion-from-enzyme-to-react-testing-library-at-slack/">Slack&rsquo;s tool</a> converted about 80 % of the test code correctly in a sample, and the team estimates 22 % of developer time saved. In a <a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/">METR trial</a>, experienced developers were 19 % slower with early-2025 tools and believed they were 20 % faster. Cycle times have to be measured; asking the team gives the wrong number.</p>
 <p>Results also shift with each model generation. Cheating rates in ImpossibleBench differ by model and by prompt.</p>
